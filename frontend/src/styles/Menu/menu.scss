@@ -1,0 +1,42 @@
+$greenBackgroundColor:#024916;
+$whiteColor: white;
+.menu{
+    position: fixed;
+    background-color: $greenBackgroundColor !important;
+    padding: 20px!important;
+    color:  $whiteColor!important;
+    font-size:24px;
+    top: 0;
+    left: 0;
+    right: 0;
+  }
+  .nav-item{
+    display: flex;
+    justify-content: right;
+    align-items: center;
+  }
+  
+  .nav-link{
+    color: $whiteColor!important;
+    font-size: 24px!important;
+    margin-right: 60px;
+    &:hover { 
+        text-decoration: underline;
+    }
+  }
+  .nav-btn{
+    margin-right: 0px;
+  }
+
+  .btn-logout{
+      padding: 5px 15px!important;
+      font-size: 20px!important;
+  }
+  
+  @media only screen and (max-width: 992px) {
+    .nav-item{
+      display: block;
+      text-align: center;
+      margin-right: 0px;
+    }
+  }

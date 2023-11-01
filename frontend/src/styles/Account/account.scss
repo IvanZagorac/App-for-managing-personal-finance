@@ -1,0 +1,41 @@
+$greenBackgroundColor:#024916;
+$whiteColor: white;
+
+.acc-add-btn{
+    padding: 10px!important;
+    background-color: $greenBackgroundColor!important;
+    margin-right: 0px!important;
+}
+
+.acc-header{
+    font-size: 32px;
+    color: $whiteColor;
+}
+
+.first-col{
+    margin-top: 60px!important;
+}
+.second-col{
+    margin-top: 60px!important;
+    padding-right: 0px!important;
+    text-align: right;
+}
+
+.acc-card{
+    width: 45%!important;
+    background-color: $greenBackgroundColor!important;
+    margin: 20px!important;
+    padding: 10px!important;
+    text-align: center !important;
+}
+
+.acc-card-header{
+    color: $whiteColor!important;
+    font-size: 28px;
+    
+}
+
+.card-header-btn{
+    position: relative!important;
+    left: 30%!important;
+}

@@ -1,0 +1,38 @@
+.acc-add-btn {
+  padding: 10px !important;
+  background-color: #024916 !important;
+  margin-right: 0px !important;
+}
+
+.acc-header {
+  font-size: 32px;
+  color: white;
+}
+
+.first-col {
+  margin-top: 60px !important;
+}
+
+.second-col {
+  margin-top: 60px !important;
+  padding-right: 0px !important;
+  text-align: right;
+}
+
+.acc-card {
+  width: 45% !important;
+  background-color: #024916 !important;
+  margin: 20px !important;
+  padding: 10px !important;
+  text-align: center !important;
+}
+
+.acc-card-header {
+  color: white !important;
+  font-size: 28px;
+}
+
+.card-header-btn {
+  position: relative !important;
+  left: 30% !important;
+}/*# sourceMappingURL=account.css.map */

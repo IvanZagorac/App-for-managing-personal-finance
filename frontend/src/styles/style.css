@@ -1,0 +1,15 @@
+@import url(./Menu/menu);
+@import url(./Home/home);
+@import url(./Account/account);
+body {
+  margin: 0;
+  background-color: #1F231C !important;
+}
+
+.cont {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}/*# sourceMappingURL=style.css.map */
