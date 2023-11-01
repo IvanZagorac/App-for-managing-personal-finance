@@ -50,7 +50,7 @@ const authRouter = function (express, User) {
                 }
             }
             catch (e) {
-                res.send((0, ApiResponse_1.default)({ error: true, description: 'PROBLEM WITH LOGIN', status: 401 }));
+                throw new Error('PROBLEM WITH LOGIN');
             }
         });
     });
@@ -78,7 +78,11 @@ const authRouter = function (express, User) {
                 password: hashedPassword
             });
             newUser.save().then(users => {
-                res.send((0, ApiResponse_1.default)({ error: false, status: 205 }), { token, user: users });
+                res.send((0, ApiResponse_1.default)({
+                    error: false,
+                    status: 205,
+                    resData: { token, user: users }
+                }));
             });
         });
     });

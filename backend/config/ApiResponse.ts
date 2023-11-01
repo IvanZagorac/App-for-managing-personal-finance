@@ -3,6 +3,7 @@ interface ResponseType {
     description?:string;
     error:boolean;
     resData?:any;
+    ajvMessage?:string[];
 }
 
 const ApiResponse = (res:ResponseType)=>

@@ -17,7 +17,6 @@ import authRouter from './router/auth-router';
 import accountRouter from './router/account-router';
 import  transactionRouter from './router/transaction-router';
 import categoryRouter from './router/category-router';
-import tokenVerifyRouter from './router/token-verify-router';
 
 
 const init = () =>
@@ -68,7 +67,6 @@ const initServer = () =>
     app.use(morgan('dev'));
 
     app.use('/auth', authRouter(express, user));
-    app.use('/token', tokenVerifyRouter(express));
     app.use('/account', accountRouter(express, account));
     app.use('/transaction', transactionRouter(express, transaction));
     app.use('/category', categoryRouter(express, category));

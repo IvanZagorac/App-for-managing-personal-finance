@@ -8,7 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const ApiResponse_1 = __importDefault(require("../config/ApiResponse"));
+const ajv_1 = __importDefault(require("ajv"));
 const transactionRouter = function (express, trans) {
     const transaction = express.Router();
     transaction.get('', (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -19,28 +24,67 @@ const transactionRouter = function (express, trans) {
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * perPage)
                 .limit(perPage);
-            res.send(transactionList);
+            res.send((0, ApiResponse_1.default)({
+                error: false,
+                status: 310,
+                resData: transactionList
+            }));
         }
         catch (error) {
-            res.status(500).send({ error: 'Server error' });
+            res.send((0, ApiResponse_1.default)({
+                error: true,
+                status: 500,
+                description: 'Error getting transaction list'
+            }));
         }
     }));
     transaction.get('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
         const transactionId = req.params.id;
         try {
-            const foundAccount = yield trans.findOne({ _id: transactionId });
-            if (foundAccount) {
-                res.send(foundAccount);
+            const foundTransaction = yield trans.findOne({ _id: transactionId });
+            if (foundTransaction) {
+                res.send((0, ApiResponse_1.default)({
+                    error: false,
+                    status: 311,
+                    resData: foundTransaction
+                }));
             }
             else {
-                res.status(404).send({ error: 'Transaction not found' });
+                res.send((0, ApiResponse_1.default)({ error: true, description: 'Transaction not found', status: 404 }));
             }
         }
         catch (error) {
-            res.status(500).send({ error: 'Server error ' });
+            res.send((0, ApiResponse_1.default)({ error: true, description: 'Server error finding one transaction', status: 500 }));
         }
     }));
     transaction.post('', (req, res) => {
+        const schema = {
+            type: 'object',
+            properties: {
+                accountId: {
+                    type: 'object',
+                    properties: {
+                        accountId: { type: 'string', pattern: '^[a-f\\d]{24}$' },
+                    },
+                },
+                categoryId: {
+                    type: 'object',
+                    properties: {
+                        categoryId: { type: 'string', pattern: '^[a-f\\d]{24}$' },
+                    },
+                },
+                time: {
+                    type: 'date',
+                },
+                description: {
+                    type: 'string',
+                    minLength: 4,
+                },
+                transactionPrize: { type: 'integer' },
+                isDeposit: { type: 'boolean' },
+            },
+            required: ['accountId', 'categoryId', 'time', 'description', 'transactionPrize', 'isDeposit']
+        };
         const transactions = new trans({
             accountId: req.body.accountId,
             categoryId: req.body.categoryId,
@@ -49,14 +93,26 @@ const transactionRouter = function (express, trans) {
             transactionPrize: req.body.transactionPrize,
             isDeposit: req.body.isDeposit,
         });
-        transactions.save().then((transactionList) => {
-            res.status(201).json({ transactionList });
-        });
+        const ajv = new ajv_1.default();
+        const validate = ajv.compile(schema);
+        const valid = validate(transactions);
+        if (!valid) {
+            const arr = [];
+            for (const [key, value] of Object.entries(validate.errors)) {
+                arr.push({ var: value.instancePath, message: value.message });
+            }
+            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
+        }
+        else {
+            transactions.save().then((transList) => {
+                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: transList }));
+            });
+        }
     });
     transaction.delete('/:id', (req, res) => {
         trans.findOneAndRemove({ _id: req.params.id }).
             then((removedList) => {
-            res.send(removedList);
+            res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
         });
     });
     return transaction;

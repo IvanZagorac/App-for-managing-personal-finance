@@ -11,7 +11,6 @@ const accountSchema = new mongoose_1.default.Schema({
     },
     name: {
         type: String,
-        unique: true
     },
     totalAmount: Number
 });

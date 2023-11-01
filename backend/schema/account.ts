@@ -7,7 +7,6 @@ const accountSchema = new mongoose.Schema({
     },
     name: {
         type: String,
-        unique: true 
     },
     totalAmount:Number
 })

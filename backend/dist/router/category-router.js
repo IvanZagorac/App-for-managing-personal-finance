@@ -8,14 +8,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const ApiResponse_1 = __importDefault(require("../config/ApiResponse"));
+const ajv_1 = __importDefault(require("ajv"));
 const categoryRouter = function (express, cat) {
     const category = express.Router();
     category.get('', (req, res) => {
         cat.find({})
             .sort({ createdAt: -1 })
             .then(categoryList => {
-            res.send(categoryList);
+            res.send((0, ApiResponse_1.default)({
+                error: false,
+                status: 320,
+                resData: categoryList
+            }));
         });
     });
     category.get('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -34,10 +43,36 @@ const categoryRouter = function (express, cat) {
         }
     }));
     category.post('', (req, res) => {
+        const schema = {
+            type: 'object',
+            properties: {
+                name: {
+                    type: 'string',
+                    minLength: 4,
+                },
+                isDeposit: { type: 'boolean' },
+            },
+            required: ['name', 'isDeposit']
+        };
         const categories = new cat({
             name: req.body.name,
             isDeposit: req.body.isDeposit,
         });
+        const ajv = new ajv_1.default();
+        const validate = ajv.compile(schema);
+        const valid = validate(categories);
+        if (!valid) {
+            const arr = [];
+            for (const [key, value] of Object.entries(validate.errors)) {
+                arr.push({ var: value.instancePath, message: value.message });
+            }
+            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
+        }
+        else {
+            categories.save().then((catList) => {
+                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: catList }));
+            });
+        }
         categories.save().then((categoryList) => {
             res.status(201).json({ categoryList });
         });

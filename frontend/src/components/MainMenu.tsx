@@ -30,10 +30,10 @@ function MainMenu({ hasToken, fullName, setDecodedToken }: { hasToken: boolean; 
                 <Navbar.Collapse id="basic-navbar-nav" className="nav-item">
                     <Nav>
                         <Nav.Item >
-                            <Nav.Link className='nav-link' onClick={()=>setNavigate('account')}>Account</Nav.Link>
+                            <Nav.Link className='nav-link' onClick={()=>setNavigate('/account')}>Account</Nav.Link>
                         </Nav.Item>
                         <Nav.Item >
-                            <Nav.Link className='nav-link' onClick={()=>setNavigate('')}>Home</Nav.Link>
+                            <Nav.Link className='nav-link' onClick={()=>setNavigate('/')}>Home</Nav.Link>
                         </Nav.Item>
                     </Nav>
                     <Nav>

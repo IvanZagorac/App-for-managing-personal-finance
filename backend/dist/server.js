@@ -19,7 +19,6 @@ const auth_router_1 = __importDefault(require("./router/auth-router"));
 const account_router_1 = __importDefault(require("./router/account-router"));
 const transaction_router_1 = __importDefault(require("./router/transaction-router"));
 const category_router_1 = __importDefault(require("./router/category-router"));
-const token_verify_router_1 = __importDefault(require("./router/token-verify-router"));
 const init = () => {
     try {
         const a = config_1.config;
@@ -51,7 +50,6 @@ const initServer = () => {
     });
     app.use((0, morgan_1.default)('dev'));
     app.use('/auth', (0, auth_router_1.default)(express_1.default, user_1.default));
-    app.use('/token', (0, token_verify_router_1.default)(express_1.default));
     app.use('/account', (0, account_router_1.default)(express_1.default, account_1.default));
     app.use('/transaction', (0, transaction_router_1.default)(express_1.default, transaction_1.default));
     app.use('/category', (0, category_router_1.default)(express_1.default, category_1.default));

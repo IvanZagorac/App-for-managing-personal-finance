@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { config } from '../config/config';
-import User from '../model/user';
+import { config } from '../../config/config';
+import User from '../../model/user';
 import { Alert,Button, Col,Container,Form} from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import RegistrationModal from './RegistrationModal';
-import DecodedToken from '../model/token';
-import { togetherFunction } from '../config/token';
+import DecodedToken from '../../model/token';
+import { togetherFunction } from '../../config/token';
 
 
 function HomePage()
@@ -73,7 +73,7 @@ function HomePage()
             navigate('account')
         }
         
-    }, []); 
+    }, [decodedToken.isExist]); 
 
     return(
         <Container className="cont">

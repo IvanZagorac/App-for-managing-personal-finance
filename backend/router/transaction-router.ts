@@ -1,4 +1,6 @@
 import { Router, Request, Response } from 'express';
+import ApiResponse from '../config/ApiResponse';
+import Ajv from 'ajv';
 
 const transactionRouter = function(express,trans):Router
 {
@@ -15,12 +17,25 @@ const transactionRouter = function(express,trans):Router
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * perPage)
                 .limit(perPage);
-
-            res.send(transactionList);
+            res.send
+            (
+                ApiResponse({
+                    error: false,
+                    status: 310, 
+                    resData:transactionList
+                })
+            )
         }
         catch (error)
         {
-            res.status(500).send({ error: 'Server error' });
+            res.send
+            (
+                ApiResponse({
+                    error: true,
+                    status: 500, 
+                    description:'Error getting transaction list'
+                })
+            )
         }
     })
 
@@ -29,25 +44,63 @@ const transactionRouter = function(express,trans):Router
         const transactionId = req.params.id;
         try
         {
-            const foundAccount = await trans.findOne({_id: transactionId});
+            const foundTransaction = await trans.findOne({_id: transactionId});
 
-            if (foundAccount)
+            if (foundTransaction)
             {
-                res.send(foundAccount);
+                res.send
+                (
+                    ApiResponse({
+                        error: false,
+                        status: 311, 
+                        resData:foundTransaction
+                    })
+                )
             }
             else
             {
-                res.status(404).send({ error: 'Transaction not found' });
+                res.send(ApiResponse({error: true, description: 'Transaction not found', status: 404}));
             }
         }
         catch (error)
         {
-            res.status(500).send({error: 'Server error '})
+            res.send(ApiResponse({error: true, description: 'Server error finding one transaction', status: 500}));
         }
     })
 
     transaction.post('', (req,res) =>
     {
+
+        const schema = {
+            type: 'object',
+            properties: {
+                accountId: {
+                    type: 'object',
+                    properties: {
+                        accountId: {type: 'string', pattern: '^[a-f\\d]{24}$'},
+                    },
+                },
+                categoryId: {
+                    type: 'object',
+                    properties: {
+                        categoryId: {type: 'string', pattern: '^[a-f\\d]{24}$'},
+                    },
+                },
+                time: { 
+                    type: 'date',
+                },
+                description: { 
+                    type:'string',
+                    minLength:4,
+                },
+                transactionPrize: { type: 'integer' },
+                isDeposit: { type: 'boolean' },
+              
+            },
+            required: ['accountId', 'categoryId', 'time', 'description', 'transactionPrize', 'isDeposit']
+        };
+
+
         const transactions = new trans({
             accountId:req.body.accountId,
             categoryId:req.body.categoryId,
@@ -56,11 +109,26 @@ const transactionRouter = function(express,trans):Router
             transactionPrize:req.body.transactionPrize,
             isDeposit:req.body.isDeposit,
         });
-    
-        transactions.save().then((transactionList)=>
+
+        const ajv = new Ajv();
+        const validate = ajv.compile(schema);
+        const valid = validate(transactions);
+        if (!valid)
         {
-            res.status(201).json({ transactionList });
-        })
+            const arr = [];
+            for (const [key, value] of Object.entries(validate.errors))
+            {
+                arr.push({var:value.instancePath, message:value.message})
+            }
+            res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
+        }
+        else
+        {
+            (transactions as typeof trans).save().then((transList) => 
+            {
+                res.send(ApiResponse({ error: false, status: 200, resData: transList }));
+            });
+        }
     });
 
     transaction.delete('/:id', (req, res) =>
@@ -68,7 +136,7 @@ const transactionRouter = function(express,trans):Router
         trans.findOneAndRemove({_id:req.params.id}).
             then((removedList)=>
             {
-                res.send(removedList);
+                res.send(ApiResponse({error: false, status:200,resData:removedList}))
             })
         
     });

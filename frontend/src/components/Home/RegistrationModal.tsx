@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z, ZodType } from 'zod';
 import axios from 'axios';
-import { config } from '../config/config';
+import { config } from '../../config/config';
 
 function RegistrationModal({ registerModal, setRegisterModal }:any)
 {

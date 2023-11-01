@@ -1,4 +1,6 @@
 import { Router, Request, Response } from 'express';
+import ApiResponse from '../config/ApiResponse';
+import Ajv from 'ajv';
 
 const categoryRouter = function(express,cat):Router
 {
@@ -10,7 +12,14 @@ const categoryRouter = function(express,cat):Router
             .sort({ createdAt: -1 })
             .then(categoryList=>
             {
-                res.send(categoryList);
+                res.send
+                (
+                    ApiResponse({
+                        error: false,
+                        status: 320, 
+                        resData:categoryList
+                    })
+                )
             })
     })
 
@@ -39,10 +48,43 @@ const categoryRouter = function(express,cat):Router
     category.post('', (req,res) =>
     {
 
+        const schema = {
+            type: 'object',
+            properties: {
+                name: { 
+                    type:'string',
+                    minLength:4,
+                },
+                isDeposit: { type: 'boolean' },
+              
+            },
+            required: ['name', 'isDeposit']
+        };
+
         const categories = new cat({
             name:req.body.name,
             isDeposit:req.body.isDeposit,
         });
+
+        const ajv = new Ajv();
+        const validate = ajv.compile(schema);
+        const valid = validate(categories);
+        if (!valid)
+        {
+            const arr = [];
+            for (const [key, value] of Object.entries(validate.errors))
+            {
+                arr.push({var:value.instancePath, message:value.message})
+            }
+            res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
+        }
+        else
+        {
+            (categories as typeof cat).save().then((catList) => 
+            {
+                res.send(ApiResponse({ error: false, status: 200, resData: catList }));
+            });
+        }
     
         categories.save().then((categoryList)=>
         {

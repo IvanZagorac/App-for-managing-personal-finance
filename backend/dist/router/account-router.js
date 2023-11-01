@@ -19,8 +19,13 @@ const accountRouter = function (express, acc) {
     account.get('', (req, res) => {
         acc.find({})
             .sort({ createdAt: -1 })
+            .limit(2)
             .then(accountList => {
-            res.send(accountList);
+            res.send((0, ApiResponse_1.default)({
+                error: false,
+                status: 303,
+                resData: accountList
+            }));
         });
     });
     account.get('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -28,59 +33,63 @@ const accountRouter = function (express, acc) {
         try {
             const foundAccount = yield acc.findOne({ _id: accountId });
             if (foundAccount) {
-                res.send(foundAccount);
+                res.send((0, ApiResponse_1.default)({
+                    error: false,
+                    status: 304,
+                    resData: foundAccount
+                }));
             }
             else {
-                res.status(404).send({ error: 'Account not found' });
+                res.send((0, ApiResponse_1.default)({ error: true, description: 'Account not found', status: 404 }));
             }
         }
         catch (error) {
-            res.status(500).send({ error: 'Server error ' });
+            res.send((0, ApiResponse_1.default)({ error: true, description: 'Server error founding account', status: 500 }));
         }
     }));
     account.post('', (req, res) => __awaiter(this, void 0, void 0, function* () {
         const schema = {
             type: 'object',
             properties: {
-                name: { type: 'string' },
-                userId: { type: 'string' },
+                name: {
+                    type: 'string',
+                    minLength: 4,
+                },
+                userId: {
+                    type: 'object',
+                    properties: {
+                        userId: { type: 'string', pattern: '^[a-f\\d]{24}$' },
+                    },
+                },
                 totalAmount: { type: 'integer' },
             },
             required: ['name', 'userId', 'totalAmount',],
         };
-        let data = yield acc.findOne({});
-        // const userId = req.body.userId;
-        // const name = req.body.name;
-        // const totalAmount = req.body.totalAmount;
-        // const accounts = new acc({
-        //     userId,
-        //     name,
-        //     totalAmount
-        // });
-        data = {
+        const accounts = new acc({
             userId: req.body.userId,
             name: req.body.name,
-            ctotalAmount: req.body.totalAmount,
-        };
+            totalAmount: req.body.totalAmount,
+        });
         const ajv = new ajv_1.default();
         const validate = ajv.compile(schema);
-        const valid = validate(data);
+        const valid = validate(accounts);
         if (!valid) {
-            res.send((0, ApiResponse_1.default)({ error: true, description: `Validation error ${validate.errors}`, status: 500 }));
+            const arr = [];
+            for (const [key, value] of Object.entries(validate.errors)) {
+                arr.push({ var: value.instancePath, message: value.message });
+            }
+            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
         }
-        yield acc.findOneAndUpdate({ $set: data }).
-            then(accList => {
-            res.send((0, ApiResponse_1.default)({ error: false, description: 'OK', status: 200 })).json({ accList });
-        });
-        // accounts.save().then((accountList)=>
-        // {
-        //     res.status(201).json({ accountList });
-        // })
+        else {
+            accounts.save().then((accList) => {
+                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: accList }));
+            });
+        }
     }));
     account.delete('/:id', (req, res) => {
         acc.findOneAndRemove({ _id: req.params.id }).
             then((removedList) => {
-            res.send(removedList);
+            res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
         });
     });
     return account;

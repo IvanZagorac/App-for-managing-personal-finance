@@ -21,12 +21,23 @@ $whiteColor: white;
     text-align: right;
 }
 
+.no-data{
+    margin-top: 50px;
+    font-size: 32px;
+    color:grey;
+}
+
 .acc-card{
     width: 45%!important;
+    margin-top: 100px!important;
+    text-align: center;
     background-color: $greenBackgroundColor!important;
-    margin: 20px!important;
     padding: 10px!important;
-    text-align: center !important;
+    transition: background-color 0.3s ease!important;
+    &:hover { 
+        background-color: #02732c!important;
+        cursor:pointer;
+    }
 }
 
 .acc-card-header{
@@ -38,4 +49,11 @@ $whiteColor: white;
 .card-header-btn{
     position: relative!important;
     left: 30%!important;
+}
+.accBtn{
+    margin-top: 20px!important;
+    margin-bottom: 20px!important;
+    padding: 5px 30px!important;
+    background-color: $greenBackgroundColor!important;
+    color: white!important;
 }

@@ -2,6 +2,12 @@ import Ajv from 'ajv';
 import { Router, Request, Response } from 'express';
 import ApiResponse from '../config/ApiResponse';
 
+interface Account {
+    userId: string;
+    name: string;
+    totalAmount:Number;
+}
+
 const accountRouter = function(express,acc):Router
 {
     const account = express.Router();
@@ -10,9 +16,17 @@ const accountRouter = function(express,acc):Router
     {
         acc.find({})
             .sort({ createdAt: -1 })
+            .limit(2)
             .then(accountList=>
             {
-                res.send(accountList);
+                res.send
+                (
+                    ApiResponse({
+                        error: false,
+                        status: 303, 
+                        resData:accountList
+                    })
+                )
             })
     })
 
@@ -25,16 +39,23 @@ const accountRouter = function(express,acc):Router
 
             if (foundAccount)
             {
-                res.send(foundAccount);
+                res.send
+                (
+                    ApiResponse({
+                        error: false,
+                        status: 304, 
+                        resData:foundAccount
+                    })
+                )
             }
             else
             {
-                res.status(404).send({ error: 'Account not found' });
+                res.send(ApiResponse({error: true, description: 'Account not found', status: 404}));
             }
         }
         catch (error)
         {
-            res.status(500).send({error: 'Server error '})
+            res.send(ApiResponse({error: true, description: 'Server error founding account', status: 500}));
         }
        
     })
@@ -44,49 +65,45 @@ const accountRouter = function(express,acc):Router
         const schema = {
             type: 'object',
             properties: {
-                name: { type: 'string' },
-                userId: { type: 'string' },
+                name: { 
+                    type: 'string',
+                    minLength:4,
+                },
+                userId: {
+                    type: 'object',
+                    properties: {
+                        userId: {type: 'string', pattern: '^[a-f\\d]{24}$'},
+                    },
+                },
                 totalAmount: { type: 'integer' },
               
             },
             required: ['name', 'userId', 'totalAmount',],
         };
-
-        let data = await acc.findOne({}) as any;
-
-        // const userId = req.body.userId;
-        // const name = req.body.name;
-        // const totalAmount = req.body.totalAmount;
-        // const accounts = new acc({
-        //     userId,
-        //     name,
-        //     totalAmount
-        // });
-
-        data = {
+        const accounts = new acc({
             userId :req.body.userId,
             name :req.body.name,
-            ctotalAmount :req.body.totalAmount,
-        }
-        
+            totalAmount :req.body.totalAmount,
+        })
         const ajv = new Ajv();
         const validate = ajv.compile(schema);
-        const valid = validate(data);
+        const valid = validate(accounts);
         if (!valid)
         {
-            res.send(ApiResponse({error:true,description:`Validation error ${validate.errors}`, status:500}))
-        }
-
-        await acc.findOneAndUpdate({$set:data}).
-            then(accList=>
+            const arr = [];
+            for (const [key, value] of Object.entries(validate.errors))
             {
-                res.send(ApiResponse({error: false, description:'OK', status:200})).json({accList})
-            })
-
-        // accounts.save().then((accountList)=>
-        // {
-        //     res.status(201).json({ accountList });
-        // })
+                arr.push({var:value.instancePath, message:value.message})
+            }
+            res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
+        }
+        else
+        {
+            (accounts as typeof acc).save().then((accList) => 
+            {
+                res.send(ApiResponse({ error: false, status: 200, resData: accList }));
+            });
+        }
 
     });
 
@@ -95,7 +112,7 @@ const accountRouter = function(express,acc):Router
         acc.findOneAndRemove({_id:req.params.id}).
             then((removedList)=>
             {
-                res.send(removedList);
+                res.send(ApiResponse({error: false, status:200,resData:removedList}))
             })
         
     });

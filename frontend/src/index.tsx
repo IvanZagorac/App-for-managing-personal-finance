@@ -5,8 +5,9 @@ import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {BrowserRouter, Route, Routes} from 'react-router-dom';
-import HomePage from './components/HomePage';
-import AccountPage from './components/AccountPage';
+import HomePage from './components/Home/HomePage';
+import AccountPage from './components/Account/AccountPage';
+import TransactionPage from './components/Transaction/TransactionPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -17,6 +18,7 @@ root.render(
             <Routes>
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/account" element={<AccountPage/>}/>
+                <Route path="/account/:tId" element={<TransactionPage/>}/>
             </Routes>
 
         </BrowserRouter>
