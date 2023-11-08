@@ -1,17 +1,15 @@
+/* eslint-disable max-len */
 import React, { useState, useEffect } from 'react';
 import { Dropdown, Button, Form } from 'react-bootstrap';
-import Category from '../../model/category';
+import Category from '../../model/Category/category';
+import PopulatedTransaction from '../../model/Transaction/populatedTransaction';
 
 // eslint-disable-next-line max-len
-const CategoryDropdown = ({ categories, isDeposit, onCategorySelect, setIsDeposit }:
+const CategoryDropdown = ({ categories, isDeposit, onCategorySelect, setIsDeposit, currentTrans }:
      // eslint-disable-next-line max-len
-     { categories:Category[], isDeposit:boolean, onCategorySelect:any, setIsDeposit: React.Dispatch<React.SetStateAction<boolean>>}) => 
+     { categories:Category[], isDeposit?:boolean, onCategorySelect:any, setIsDeposit: React.Dispatch<React.SetStateAction<boolean>> , currentTrans:PopulatedTransaction | null}) => 
 {
-    const [selectedCategory, setSelectedCategory] = useState<Category>({
-        _id: '',
-        name: '',
-        isDeposit: false,
-    });
+    const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 
     const [filteredCategories, setFilteredCategories] = useState<Category[]>([]);
 
@@ -20,10 +18,11 @@ const CategoryDropdown = ({ categories, isDeposit, onCategorySelect, setIsDeposi
         setFilteredCategories(categories.filter((category) => category.isDeposit === isDeposit));
     }, [categories, isDeposit]);
 
-    const handleCategorySelect = (category:Category) => 
+    const handleCategorySelect = (category:Category | null) => 
     {
+        console.log(category);
         setSelectedCategory(category);
-        onCategorySelect(category._id);
+        onCategorySelect(category?._id);
     };
 
     return (
@@ -33,11 +32,28 @@ const CategoryDropdown = ({ categories, isDeposit, onCategorySelect, setIsDeposi
                 label='isDeposit'
                 checked={isDeposit}
                 onChange={() => setIsDeposit(!isDeposit)}
+                className="custom-checkbox"
+                id="isDepositCheckbox"
             />
 
-            <Dropdown>
+            <Dropdown className='cat-dropdown'>
                 <Dropdown.Toggle variant="success" id="dropdown-basic">
-                    {selectedCategory ? selectedCategory.name : 'Select Category'}
+                    {
+                        selectedCategory ? (
+                            <>
+                                {selectedCategory.name}{' '}
+                                <Button className='dropdown-btn' variant="light" size="sm" onClick={() => handleCategorySelect(null)}>X</Button>
+                            </>
+                        ) : 
+                            currentTrans ?
+                                (
+                                    currentTrans?.categoryId.name
+                                ):
+                                (
+                                    'Select Category'
+                                )
+                    
+                    }
                 </Dropdown.Toggle>
 
                 <Dropdown.Menu>

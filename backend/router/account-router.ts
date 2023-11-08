@@ -1,33 +1,40 @@
 import Ajv from 'ajv';
 import { Router, Request, Response } from 'express';
 import ApiResponse from '../config/ApiResponse';
+import { BSON } from 'mongodb';
 
-interface Account {
-    userId: string;
-    name: string;
-    totalAmount:Number;
-}
 
 const accountRouter = function(express,acc):Router
 {
     const account = express.Router();
 
-    account.get('',(req,res)=>
+    account.get('',async(req,res)=>
     {
-        acc.find({})
-            .sort({ createdAt: -1 })
-            .limit(2)
-            .then(accountList=>
-            {
-                res.send
-                (
-                    ApiResponse({
-                        error: false,
-                        status: 303, 
-                        resData:accountList
-                    })
-                )
+        const accounts = await acc.find({}).sort({ createdAt: -1 });
+
+        res.send
+        (
+            ApiResponse({
+                error: false,
+                status: 200, 
+                resData:accounts
             })
+        )
+    })
+    account.patch('/:id',async(req,res)=>
+    {
+        const accountId = req.params.id;
+        
+        const accounts = await acc.findOneAndUpdate({_id:accountId},{$set: {totalAmount:req.body.totalAm }});
+
+        res.send
+        (
+            ApiResponse({
+                error: false,
+                status: 200, 
+                resData:accounts
+            })
+        )
     })
 
     account.get('/:id',async (req,res)=>
@@ -43,7 +50,7 @@ const accountRouter = function(express,acc):Router
                 (
                     ApiResponse({
                         error: false,
-                        status: 304, 
+                        status: 200, 
                         resData:foundAccount
                     })
                 )
@@ -85,12 +92,28 @@ const accountRouter = function(express,acc):Router
             name :req.body.name,
             totalAmount :req.body.totalAmount,
         })
+       
+        
         const ajv = new Ajv();
         const validate = ajv.compile(schema);
         const valid = validate(accounts);
+
+        const nid = new BSON.ObjectId(req.body.userId);
+        const findByUserId = await acc.find({userId: nid})
+        const arr = [];
+        let existsTwoAcc = false;
+        if (Object.keys(findByUserId).length >= 2)
+        {
+            arr.push({var:'An account', message:'must NOT have more than 2 accounts'})
+            existsTwoAcc = true;
+        }
+        if (existsTwoAcc)
+        {
+            res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
+        }
         if (!valid)
         {
-            const arr = [];
+            
             for (const [key, value] of Object.entries(validate.errors))
             {
                 arr.push({var:value.instancePath, message:value.message})
@@ -99,21 +122,26 @@ const accountRouter = function(express,acc):Router
         }
         else
         {
-            (accounts as typeof acc).save().then((accList) => 
+            const existAcc = await acc.findOne({ userId: req.body.userId, name: req.body.name })
+            if (existAcc)
             {
-                res.send(ApiResponse({ error: false, status: 200, resData: accList }));
-            });
+                // eslint-disable-next-line max-len
+                res.send(ApiResponse({error:true,description:'An account with the same name and user already exists.', status:500}))
+            }
+            else
+            {
+                // No existing account found, save the new account
+                const accs = await (accounts as typeof acc).save();
+                res.send(ApiResponse({ error: false, status: 200, resData: accs }));
+            }
         }
 
     });
 
-    account.delete('/:id', (req, res) =>
+    account.delete('/:id', async (req, res) =>
     {
-        acc.findOneAndRemove({_id:req.params.id}).
-            then((removedList)=>
-            {
-                res.send(ApiResponse({error: false, status:200,resData:removedList}))
-            })
+        const removedList = await  acc.findOneAndRemove({_id:req.params.id});
+        res.send(ApiResponse({error: false, status:200,resData:removedList}));
         
     });
 

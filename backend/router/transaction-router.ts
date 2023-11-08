@@ -1,6 +1,15 @@
 import { Router, Request, Response } from 'express';
 import ApiResponse from '../config/ApiResponse';
 import Ajv from 'ajv';
+import { BSON } from 'mongodb';
+
+type QueryObject = {
+    accountId: Object;
+    time?: {
+        $gte?: Date;
+        $lte?: Date;
+    };
+};
 
 const transactionRouter = function(express,trans):Router
 {
@@ -8,23 +17,62 @@ const transactionRouter = function(express,trans):Router
 
     transaction.get('',async (req,res)=>
     {
-        const page = parseInt(req.query.page) || 1; 
-        const perPage = 15;
+        const page = parseInt(req.query.currentPage,10) || 1; 
+        const accountId = req.query.aId;
+        const aId = new BSON.ObjectId(accountId);
+        const perPage = 10;
+        const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+        const endDate = req.query.endDate ? new Date(req.query.endDate) : null;
 
         try
         {
-            const transactionList = await trans.find({})
-                .sort({ createdAt: -1 })
+            const query:QueryObject = {
+                accountId: aId,
+            }
+    
+            if (startDate) 
+            {
+                query.time.$gte = startDate;
+            }
+    
+            if (endDate) 
+            {
+                endDate.setHours(23, 59, 59, 999);
+                query.time.$lte = endDate;
+            }
+            const totalCount = await trans.find(query).countDocuments();
+            const transactionList = await trans.find(query)
+                .sort({ time: -1 })
                 .skip((page - 1) * perPage)
-                .limit(perPage);
-            res.send
-            (
-                ApiResponse({
-                    error: false,
-                    status: 310, 
-                    resData:transactionList
-                })
-            )
+                .limit(perPage)
+                .populate('categoryId')
+                .populate('accountId')
+
+            if (transactionList.length != 0)
+            {
+                res.send
+                (
+                    ApiResponse({
+                        error: false,
+                        status: 200, 
+                        resData:transactionList,
+                        totalCount
+                    })
+                )
+            }
+            else
+            {
+                res.send
+                (
+                    ApiResponse({
+                        error: true,
+                        status: 404, 
+                        description:'Data not found'
+                    })
+                )
+                   
+            }
+
         }
         catch (error)
         {
@@ -39,12 +87,14 @@ const transactionRouter = function(express,trans):Router
         }
     })
 
+
     transaction.get('/:id',async (req,res)=>
     {
         const transactionId = req.params.id;
         try
         {
-            const foundTransaction = await trans.findOne({_id: transactionId});
+            const foundTransaction = await trans.findOne({_id: transactionId})
+                .populate('categories');
 
             if (foundTransaction)
             {
@@ -52,7 +102,7 @@ const transactionRouter = function(express,trans):Router
                 (
                     ApiResponse({
                         error: false,
-                        status: 311, 
+                        status: 200, 
                         resData:foundTransaction
                     })
                 )
@@ -68,7 +118,7 @@ const transactionRouter = function(express,trans):Router
         }
     })
 
-    transaction.post('', (req,res) =>
+    transaction.post('', async(req,res) =>
     {
 
         const schema = {
@@ -86,9 +136,6 @@ const transactionRouter = function(express,trans):Router
                         categoryId: {type: 'string', pattern: '^[a-f\\d]{24}$'},
                     },
                 },
-                time: { 
-                    type: 'date',
-                },
                 description: { 
                     type:'string',
                     minLength:4,
@@ -97,47 +144,80 @@ const transactionRouter = function(express,trans):Router
                 isDeposit: { type: 'boolean' },
               
             },
-            required: ['accountId', 'categoryId', 'time', 'description', 'transactionPrize', 'isDeposit']
+            required: ['accountId', 'categoryId', 'description', 'transactionPrize', 'isDeposit']
         };
 
+        req.body.accountId = new BSON.ObjectId(req.body.accountId);
+        req.body.transactionPrize = parseInt(req.body.transactionPrize,10);
+        let isTrPrizePositive = false;
 
-        const transactions = new trans({
+        if (req.body.transactionPrize > 0)
+        {
+            isTrPrizePositive = true;
+        }
+
+        let filter={};
+        if (req.body._id)
+        {
+            filter = {
+                _id:req.body._id,
+            };
+        }
+        else
+        {
+            filter = {
+                _id:new BSON.ObjectId(),
+            };
+            
+        }
+
+        const transactions = {
             accountId:req.body.accountId,
-            categoryId:req.body.categoryId,
-            time: req.body.time,
+            categoryId:req.body.categoryId ? new BSON.ObjectId(req.body.categoryId) : req.body.categoryId,
+            time: req.body.time ? req.body.time : Date.now().toString(),
             description:req.body.description,
             transactionPrize:req.body.transactionPrize,
             isDeposit:req.body.isDeposit,
-        });
+        };
+        const options = {
+            new: true,
+            upsert: true,
+        };
 
         const ajv = new Ajv();
         const validate = ajv.compile(schema);
         const valid = validate(transactions);
-        if (!valid)
+        const arr = [];
+        if (isTrPrizePositive)
         {
-            const arr = [];
-            for (const [key, value] of Object.entries(validate.errors))
+            if (!valid)
             {
-                arr.push({var:value.instancePath, message:value.message})
+                
+                for (const [key, value] of Object.entries(validate.errors))
+                {
+                    arr.push({var:value.instancePath, message:value.message})
+                }
+                res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
             }
-            res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
+            else
+            {
+                const transList = await trans.updateOne(filter,{$set:transactions},options);
+                res.send(ApiResponse({ error: false, status: 200, resData: transList }));
+    
+            }
         }
         else
         {
-            (transactions as typeof trans).save().then((transList) => 
-            {
-                res.send(ApiResponse({ error: false, status: 200, resData: transList }));
-            });
+            arr.push({var:'Transaction prize', message:'must NOT be zero or negative number'})
+            res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
         }
+       
     });
 
-    transaction.delete('/:id', (req, res) =>
+    transaction.delete('/:id', async(req, res) =>
     {
-        trans.findOneAndRemove({_id:req.params.id}).
-            then((removedList)=>
-            {
-                res.send(ApiResponse({error: false, status:200,resData:removedList}))
-            })
+        const removedList = await trans.findOneAndRemove({_id:req.params.id});
+        res.send(ApiResponse({error: false, status:200,resData:removedList}));
         
     });
 

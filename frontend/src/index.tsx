@@ -8,6 +8,7 @@ import {BrowserRouter, Route, Routes} from 'react-router-dom';
 import HomePage from './components/Home/HomePage';
 import AccountPage from './components/Account/AccountPage';
 import TransactionPage from './components/Transaction/TransactionPage';
+import CategoryPage from './components/Category/CategoryPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -16,9 +17,10 @@ root.render(
     <React.StrictMode>
         <BrowserRouter>
             <Routes>
+                <Route path="/category" element={<CategoryPage/>}/>
                 <Route path="/" element={<HomePage/>}/>
                 <Route path="/account" element={<AccountPage/>}/>
-                <Route path="/account/:tId" element={<TransactionPage/>}/>
+                <Route path="/account/:aId" element={<TransactionPage/>}/>
             </Routes>
 
         </BrowserRouter>

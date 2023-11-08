@@ -14,5 +14,6 @@ const accountSchema = new mongoose_1.default.Schema({
     },
     totalAmount: Number
 });
+accountSchema.index({ userId: 1, name: 1 }, { unique: true });
 exports.default = mongoose_1.default.model('Accounts', accountSchema);
 //# sourceMappingURL=account.js.map

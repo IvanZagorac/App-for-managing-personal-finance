@@ -14,6 +14,7 @@ $whiteColor: white;
 
 .first-col{
     margin-top: 60px!important;
+    display: flex!important;
 }
 .second-col{
     margin-top: 60px!important;
@@ -22,7 +23,7 @@ $whiteColor: white;
 }
 
 .no-data{
-    margin-top: 50px;
+    margin-top: 150px!important;
     font-size: 32px;
     color:grey;
 }
@@ -30,7 +31,8 @@ $whiteColor: white;
 .acc-card{
     width: 45%!important;
     margin-top: 100px!important;
-    text-align: center;
+    margin-right: 60px!important;
+    text-decoration: none!important;
     background-color: $greenBackgroundColor!important;
     padding: 10px!important;
     transition: background-color 0.3s ease!important;
@@ -42,16 +44,30 @@ $whiteColor: white;
 
 .acc-card-header{
     color: $whiteColor!important;
+    border-bottom: 0!important;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     font-size: 28px;
     
 }
 
+.acc-link{
+    text-decoration: none!important;
+}
+
+.btn-div{
+    position: absolute;
+    right: 5%;
+    top: 10%;
+}
+
 .card-header-btn{
-    position: relative!important;
-    left: 30%!important;
+    padding: 5px 15px!important;
+    
 }
 .accBtn{
-    margin-top: 20px!important;
     margin-bottom: 20px!important;
     padding: 5px 30px!important;
     background-color: $greenBackgroundColor!important;

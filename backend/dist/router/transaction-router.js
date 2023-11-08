@@ -14,21 +14,49 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ApiResponse_1 = __importDefault(require("../config/ApiResponse"));
 const ajv_1 = __importDefault(require("ajv"));
+const mongodb_1 = require("mongodb");
 const transactionRouter = function (express, trans) {
     const transaction = express.Router();
     transaction.get('', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const page = parseInt(req.query.page) || 1;
-        const perPage = 15;
+        const page = parseInt(req.query.currentPage, 10) || 1;
+        const accountId = req.query.aId;
+        const aId = new mongodb_1.BSON.ObjectId(accountId);
+        const perPage = 10;
+        const startDate = req.query.startDate ? new Date(req.query.startDate) : null;
+        const endDate = req.query.endDate ? new Date(req.query.endDate) : null;
         try {
-            const transactionList = yield trans.find({})
-                .sort({ createdAt: -1 })
+            const query = {
+                accountId: aId,
+            };
+            if (startDate) {
+                query.time.$gte = startDate;
+            }
+            if (endDate) {
+                endDate.setHours(23, 59, 59, 999);
+                query.time.$lte = endDate;
+            }
+            const totalCount = yield trans.find(query).countDocuments();
+            const transactionList = yield trans.find(query)
+                .sort({ time: -1 })
                 .skip((page - 1) * perPage)
-                .limit(perPage);
-            res.send((0, ApiResponse_1.default)({
-                error: false,
-                status: 310,
-                resData: transactionList
-            }));
+                .limit(perPage)
+                .populate('categoryId')
+                .populate('accountId');
+            if (transactionList.length != 0) {
+                res.send((0, ApiResponse_1.default)({
+                    error: false,
+                    status: 200,
+                    resData: transactionList,
+                    totalCount
+                }));
+            }
+            else {
+                res.send((0, ApiResponse_1.default)({
+                    error: true,
+                    status: 404,
+                    description: 'Data not found'
+                }));
+            }
         }
         catch (error) {
             res.send((0, ApiResponse_1.default)({
@@ -41,11 +69,12 @@ const transactionRouter = function (express, trans) {
     transaction.get('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
         const transactionId = req.params.id;
         try {
-            const foundTransaction = yield trans.findOne({ _id: transactionId });
+            const foundTransaction = yield trans.findOne({ _id: transactionId })
+                .populate('categories');
             if (foundTransaction) {
                 res.send((0, ApiResponse_1.default)({
                     error: false,
-                    status: 311,
+                    status: 200,
                     resData: foundTransaction
                 }));
             }
@@ -57,7 +86,7 @@ const transactionRouter = function (express, trans) {
             res.send((0, ApiResponse_1.default)({ error: true, description: 'Server error finding one transaction', status: 500 }));
         }
     }));
-    transaction.post('', (req, res) => {
+    transaction.post('', (req, res) => __awaiter(this, void 0, void 0, function* () {
         const schema = {
             type: 'object',
             properties: {
@@ -73,9 +102,6 @@ const transactionRouter = function (express, trans) {
                         categoryId: { type: 'string', pattern: '^[a-f\\d]{24}$' },
                     },
                 },
-                time: {
-                    type: 'date',
-                },
                 description: {
                     type: 'string',
                     minLength: 4,
@@ -83,38 +109,62 @@ const transactionRouter = function (express, trans) {
                 transactionPrize: { type: 'integer' },
                 isDeposit: { type: 'boolean' },
             },
-            required: ['accountId', 'categoryId', 'time', 'description', 'transactionPrize', 'isDeposit']
+            required: ['accountId', 'categoryId', 'description', 'transactionPrize', 'isDeposit']
         };
-        const transactions = new trans({
+        req.body.accountId = new mongodb_1.BSON.ObjectId(req.body.accountId);
+        req.body.transactionPrize = parseInt(req.body.transactionPrize, 10);
+        let isTrPrizePositive = false;
+        if (req.body.transactionPrize > 0) {
+            isTrPrizePositive = true;
+        }
+        let filter = {};
+        if (req.body._id) {
+            filter = {
+                _id: req.body._id,
+            };
+        }
+        else {
+            filter = {
+                _id: new mongodb_1.BSON.ObjectId(),
+            };
+        }
+        const transactions = {
             accountId: req.body.accountId,
-            categoryId: req.body.categoryId,
-            time: req.body.time,
+            categoryId: req.body.categoryId ? new mongodb_1.BSON.ObjectId(req.body.categoryId) : req.body.categoryId,
+            time: req.body.time ? req.body.time : Date.now().toString(),
             description: req.body.description,
             transactionPrize: req.body.transactionPrize,
             isDeposit: req.body.isDeposit,
-        });
+        };
+        const options = {
+            new: true,
+            upsert: true,
+        };
         const ajv = new ajv_1.default();
         const validate = ajv.compile(schema);
         const valid = validate(transactions);
-        if (!valid) {
-            const arr = [];
-            for (const [key, value] of Object.entries(validate.errors)) {
-                arr.push({ var: value.instancePath, message: value.message });
+        const arr = [];
+        if (isTrPrizePositive) {
+            if (!valid) {
+                for (const [key, value] of Object.entries(validate.errors)) {
+                    arr.push({ var: value.instancePath, message: value.message });
+                }
+                res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
             }
-            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
+            else {
+                const transList = yield trans.updateOne(filter, { $set: transactions }, options);
+                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: transList }));
+            }
         }
         else {
-            transactions.save().then((transList) => {
-                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: transList }));
-            });
+            arr.push({ var: 'Transaction prize', message: 'must NOT be zero or negative number' });
+            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
         }
-    });
-    transaction.delete('/:id', (req, res) => {
-        trans.findOneAndRemove({ _id: req.params.id }).
-            then((removedList) => {
-            res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
-        });
-    });
+    }));
+    transaction.delete('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        const removedList = yield trans.findOneAndRemove({ _id: req.params.id });
+        res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
+    }));
     return transaction;
 };
 exports.default = transactionRouter;

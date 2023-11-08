@@ -2,10 +2,13 @@ $blackBackgroundColor:#1F231C;
 @import url(./Menu/menu);
 @import url(./Home/home);
 @import url(./Account/account);
+@import url(./Transaction/transaction);
+@import url(./Categories/categories);
 
 body{
   margin:0;
   background-color: $blackBackgroundColor!important;
+  height: 100vh;
 }
 
 .cont{

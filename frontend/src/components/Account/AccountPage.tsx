@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Alert, Button, Card, Col, Container, Form, Modal, Row } from 'react-bootstrap';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import MainMenu from '../MainMenu';
-import Account from '../../model/account';
+import Account from '../../model/Account/account';
 import { config } from '../../config/config';
 import axios from 'axios';
-import DecodedToken from '../../model/token';
+import DecodedToken from '../../model/Auth/token';
 import { togetherFunction } from '../../config/token';
+import ajvMess from '../../model/Auth/ajv';
 
 function AccountPage()
 {
@@ -18,6 +19,7 @@ function AccountPage()
     })
     const[allAccounts,setAllAccounts] = useState<Account[]>([])
     const[accountModal,setAccountModal] = useState<boolean>(false);
+    const[noDataMsg,setNoDataMsg] = useState<string>('');
     const[errorMessage,setErrorMessage] =useState<ajvMess[]>([]);
     const[account,setAccount] = useState<Account>({
         _id:'',
@@ -32,28 +34,18 @@ function AccountPage()
         try
         {
             let userId:string | null = null;
-            let response:any;
             if (decodedToken.value != null)
             {
                 userId = decodedToken.value._id;
             }
-
-            if (allAccounts.length >= 2)
-            {
-                setErrorMessage([{var: 'User', message: 'must NOT have more than 2 accounts'}])
-            }
-            else
-            {
-                response = await axios.post(config.pool + 'account', {
-                    userId,
-                    name:account.name,
-                    totalAmount:account.totalAmount,
-                });
-            }
+            const response = await axios.post(config.pool + 'account', {
+                userId,
+                name:account.name,
+                totalAmount:account.totalAmount,
+            });
             
             if (response.data.error)
             {
-                
                 setErrorMessage(response.data.ajvMessage);
             }
             else
@@ -72,13 +64,19 @@ function AccountPage()
         
     }
 
-    const getAllAccounts=async()=>
+    const getAllAccounts=async ()=>
     {
-        await axios.get(config.pool+'account')
-            .then((res)=>
-            {
-                setAllAccounts(res.data.resData);
-            })
+        const response = await axios.get(config.pool+'account')
+        if (response.data.error)
+        {
+            setNoDataMsg('NO DATA');
+        }
+        else
+        {
+            setAllAccounts(response.data.resData);
+            setNoDataMsg('');
+        }
+       
     }
 
     const handleInputChange = (e:any) => 
@@ -94,6 +92,13 @@ function AccountPage()
     {
         await axios.delete(config.pool+'account/'+id);
         getAllAccounts();
+    }
+
+    const handleRemove = async(event:any,accId:string) =>
+    {
+        event.preventDefault();
+
+        await deleteAccount(accId);
     }
 
     useEffect(()=>
@@ -118,48 +123,59 @@ function AccountPage()
             }
             <Container className="cont">
                 <Row className="w-100">
-                    <Col lg="6" sm="12" className='first-col'>
+                    <Col lg="6" sm="6" className='first-col'>
                         <h2 className='acc-header'>Accounts</h2>
                     </Col>
-                    <Col lg="6" sm="12" className='second-col'>
+                    <Col lg="6" sm="6" className='second-col'>
                         {
                             // eslint-disable-next-line max-len
                             <Button onClick={()=> setAccountModal(true)} className='acc-add-btn' variant='primary'>Add new account</Button>
                         }   
                     </Col>
                     {
-                        allAccounts.map((acc) => 
-                        {
-                            if (decodedToken.value && acc.userId === decodedToken.value._id ) 
-                            {
-                                return (
-                                    <>
-                                        <Link to={`/account/${acc._id}`}>
-                                            <Card className='acc-card'>
-                                                <Card.Header className='acc-card-header'>
-                                                    {acc.name}
-                                                    {
-                                                        // eslint-disable-next-line max-len
-                                                        <Button className='card-header-btn' variant='danger' onClick={()=>deleteAccount(acc._id)}>Remove</Button>
-                                                    }
-
-                                                </Card.Header>
-                                                <Card.Body className='acc-card-header'>
-                                                    {`${acc.totalAmount} EUR`}
-                                                </Card.Body>
-                                            </Card>
-                                        </Link>
-                                    </>
-                                           
-                                );
-                            }
-                            else 
-                            {
-                                return <h2 className='no-data'>NO DATA</h2>;
-                            }
-                        })
+                        noDataMsg && noDataMsg.length != 0 ?
+                            (
+                                <>
+                                    <h2 className='no-data'>NO DATA</h2>
+                                </>
+                            )
+                            :
+                            (
+                                allAccounts.map((acc) => 
+                                {
+                                    if (decodedToken.value && acc.userId === decodedToken.value._id ) 
+                                    {
+                                        return (
+                                            <>
+                                                <Card className='acc-card'>
+                                                    <Link to={`/account/${acc._id}`} className='acc-link'>
+                                                        <Card.Header className='acc-card-header'>
+                                                            <div className='acc-values'>
+                                                                <p>{acc.name}</p>
+                                                            </div>
+                                                            <div className='btn-div'>
+                                                                {
+                                                                // eslint-disable-next-line max-len
+                                                                    <Button className='card-header-btn' variant='danger' onClick={(event)=>handleRemove(event, acc._id)}>Remove</Button>
+                                                                }
+                                                            </div>
+                                               
+                                                        </Card.Header>
+                                            
+                                                        <Card.Body className='acc-card-header'>
+                                                            <p className='acc-values'> {`${acc.totalAmount} EUR`}</p>
+                                                        </Card.Body>
+                                                    </Link>
+                                                </Card>
+                                            </>
+                                       
+                                        );
+                                    }
+                                })
+                            )
+                        
+                        
                     }
-                    
                 </Row>
             </Container>
             <Modal

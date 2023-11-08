@@ -11,4 +11,6 @@ const accountSchema = new mongoose.Schema({
     totalAmount:Number
 })
 
+accountSchema.index({ userId: 1, name: 1 }, { unique: true });
+
 export default mongoose.model('Accounts', accountSchema);

@@ -1,6 +1,6 @@
 import { Button, Container, Nav, Navbar, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import DecodedToken from '../model/token';
+import DecodedToken from '../model/Auth/token';
 
 
 // eslint-disable-next-line max-len
@@ -30,10 +30,10 @@ function MainMenu({ hasToken, fullName, setDecodedToken }: { hasToken: boolean; 
                 <Navbar.Collapse id="basic-navbar-nav" className="nav-item">
                     <Nav>
                         <Nav.Item >
-                            <Nav.Link className='nav-link' onClick={()=>setNavigate('/account')}>Account</Nav.Link>
+                            <Nav.Link className='nav-link' onClick={()=>setNavigate('/account')}>Accounts</Nav.Link>
                         </Nav.Item>
                         <Nav.Item >
-                            <Nav.Link className='nav-link' onClick={()=>setNavigate('/')}>Home</Nav.Link>
+                            <Nav.Link className='nav-link' onClick={()=>setNavigate('/category')}>Categories</Nav.Link>
                         </Nav.Item>
                     </Nav>
                     <Nav>

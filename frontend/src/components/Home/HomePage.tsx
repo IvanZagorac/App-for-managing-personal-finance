@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { config } from '../../config/config';
-import User from '../../model/user';
+import User from '../../model/Auth/user';
 import { Alert,Button, Col,Container,Form} from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import RegistrationModal from './RegistrationModal';
-import DecodedToken from '../../model/token';
+import DecodedToken from '../../model/Auth/token';
 import { togetherFunction } from '../../config/token';
 
 
@@ -33,7 +33,6 @@ function HomePage()
             email: user.email,
             password: user.password
         });
-        console.log(response.data);
         if (response.data.error && response.data.description)
         {
             setMessage(response.data.description);

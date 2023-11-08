@@ -1,26 +1,95 @@
 import { Router, Request, Response } from 'express';
 import ApiResponse from '../config/ApiResponse';
 import Ajv from 'ajv';
+import { BSON } from 'mongodb';
 
 const categoryRouter = function(express,cat):Router
 {
     const category = express.Router();
 
-    category.get('',(req,res)=>
+    category.get('/filterDeposit',async(req,res)=>
     {
-        cat.find({})
-            .sort({ createdAt: -1 })
-            .then(categoryList=>
+        try
+        {
+            const page = parseInt(req.query.currentPage,10) || 1; 
+            const userId = req.query.userId;
+            const cId = new BSON.ObjectId(userId);
+            const perPage = 10;
+
+            const totalCount =  await cat
+                .find({isDeposit:req.query.filterIsDeposit, cId}).countDocuments();
+            const allCategories = await cat
+                .find({isDeposit:req.query.filterIsDeposit, cId})
+                .sort({ createdAt: -1 })
+                .skip((page - 1) * perPage)
+                .limit(perPage);
+
+            if (allCategories.length != 0)
             {
                 res.send
                 (
                     ApiResponse({
                         error: false,
-                        status: 320, 
-                        resData:categoryList
+                        status: 200, 
+                        resData:allCategories,
+                        totalCount
                     })
                 )
-            })
+            }
+            else
+            {
+                res.send
+                (
+                    ApiResponse({
+                        error: true,
+                        status: 404, 
+                        description:'Data not found'
+                    })
+                )
+                   
+            }
+        }
+        catch(e)
+        {
+            res.send
+            (
+                ApiResponse({
+                    error: true,
+                    status: 500, 
+                    description:'Error fetching categories'
+                })
+            )
+        }
+        
+    })
+
+    category.get('',async(req,res)=>
+    {
+
+        const allCategories = await  cat.find({}).sort({ createdAt: -1 });
+        if (allCategories.length != 0)
+        {
+            res.send
+            (
+                ApiResponse({
+                    error: false,
+                    status: 200, 
+                    resData:allCategories
+                })
+            )
+        }
+        else
+        {
+            res.send
+            (
+                ApiResponse({
+                    error: true,
+                    status: 404, 
+                    description:'No data found'
+                })
+            )
+        }
+        
     })
 
     category.get('/:id',async (req,res)=>
@@ -32,11 +101,25 @@ const categoryRouter = function(express,cat):Router
 
             if (foundAccount)
             {
-                res.send(foundAccount);
+                res.send
+                (
+                    ApiResponse({
+                        error: false,
+                        status: 200, 
+                        resData:foundAccount
+                    })
+                )
             }
             else
             {
-                res.status(404).send({ error: 'Catgory not found' });
+                res.send
+                (
+                    ApiResponse({
+                        error: true,
+                        status: 404, 
+                        description:'Category not found'
+                    })
+                )
             }
         }
         catch (error)
@@ -45,7 +128,7 @@ const categoryRouter = function(express,cat):Router
         }
     })
 
-    category.post('', (req,res) =>
+    category.post('', async(req,res) =>
     {
 
         const schema = {
@@ -56,15 +139,42 @@ const categoryRouter = function(express,cat):Router
                     minLength:4,
                 },
                 isDeposit: { type: 'boolean' },
+                userId: {
+                    type: 'object',
+                    properties: {
+                        userId: {type: 'string', pattern: '^[a-f\\d]{24}$'},
+                    },
+                },
               
             },
-            required: ['name', 'isDeposit']
+            required: ['name', 'isDeposit','userId']
         };
 
-        const categories = new cat({
+        let filter={};
+        if (req.body._id)
+        {
+            filter = {
+                _id:req.body._id,
+            };
+        }
+        else
+        {
+            filter = {
+                _id:new BSON.ObjectId(),
+            };
+            
+        }
+        req.body.userId = new BSON.ObjectId(req.body.userId);
+
+        const categories = {
             name:req.body.name,
             isDeposit:req.body.isDeposit,
-        });
+            userId:req.body.userId
+        };
+        const options = {
+            new: true,
+            upsert: true,
+        };
 
         const ajv = new Ajv();
         const validate = ajv.compile(schema);
@@ -80,26 +190,16 @@ const categoryRouter = function(express,cat):Router
         }
         else
         {
-            (categories as typeof cat).save().then((catList) => 
-            {
-                res.send(ApiResponse({ error: false, status: 200, resData: catList }));
-            });
+            const catList = await cat.updateOne(filter,{$set:categories},options);
+            res.send(ApiResponse({ error: false, status: 200, resData: catList }));
         }
-    
-        categories.save().then((categoryList)=>
-        {
-            res.status(201).json({ categoryList });
-        })
+
     });
 
-    category.delete('/:id', (req, res) =>
+    category.delete('/:id', async(req, res) =>
     {
-        cat.findOneAndRemove({_id:req.params.id}).
-            then((removedList)=>
-            {
-                res.send(removedList);
-            })
-        
+        const removedList = await cat.findOneAndRemove({_id:req.params.id})
+        res.send(ApiResponse({ error: false, status: 200, resData: removedList }));
     });
 
 

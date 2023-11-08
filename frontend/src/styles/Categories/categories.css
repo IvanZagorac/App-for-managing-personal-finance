@@ -1,0 +1,17 @@
+.custom-checkbox-cat label {
+  width: 20px !important;
+  height: 20px !important;
+  color: white !important;
+}
+
+.custom-checkbox-cat {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  margin-left: 50px;
+}
+
+.header-cat {
+  width: 100% !important;
+  margin-bottom: 150px !important;
+}/*# sourceMappingURL=categories.css.map */

@@ -14,20 +14,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const ajv_1 = __importDefault(require("ajv"));
 const ApiResponse_1 = __importDefault(require("../config/ApiResponse"));
+const mongodb_1 = require("mongodb");
 const accountRouter = function (express, acc) {
     const account = express.Router();
-    account.get('', (req, res) => {
-        acc.find({})
-            .sort({ createdAt: -1 })
-            .limit(2)
-            .then(accountList => {
-            res.send((0, ApiResponse_1.default)({
-                error: false,
-                status: 303,
-                resData: accountList
-            }));
-        });
-    });
+    account.get('', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        const accounts = yield acc.find({}).sort({ createdAt: -1 });
+        res.send((0, ApiResponse_1.default)({
+            error: false,
+            status: 200,
+            resData: accounts
+        }));
+    }));
+    account.patch('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        const accountId = req.params.id;
+        const accounts = yield acc.findOneAndUpdate({ _id: accountId }, { $set: { totalAmount: req.body.totalAm } });
+        res.send((0, ApiResponse_1.default)({
+            error: false,
+            status: 200,
+            resData: accounts
+        }));
+    }));
     account.get('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
         const accountId = req.params.id;
         try {
@@ -35,7 +41,7 @@ const accountRouter = function (express, acc) {
             if (foundAccount) {
                 res.send((0, ApiResponse_1.default)({
                     error: false,
-                    status: 304,
+                    status: 200,
                     resData: foundAccount
                 }));
             }
@@ -73,25 +79,40 @@ const accountRouter = function (express, acc) {
         const ajv = new ajv_1.default();
         const validate = ajv.compile(schema);
         const valid = validate(accounts);
+        const nid = new mongodb_1.BSON.ObjectId(req.body.userId);
+        const findByUserId = yield acc.find({ userId: nid });
+        const arr = [];
+        let existsTwoAcc = false;
+        if (Object.keys(findByUserId).length >= 2) {
+            arr.push({ var: 'An account', message: 'must NOT have more than 2 accounts' });
+            existsTwoAcc = true;
+        }
+        if (existsTwoAcc) {
+            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
+        }
         if (!valid) {
-            const arr = [];
             for (const [key, value] of Object.entries(validate.errors)) {
                 arr.push({ var: value.instancePath, message: value.message });
             }
             res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
         }
         else {
-            accounts.save().then((accList) => {
-                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: accList }));
-            });
+            const existAcc = yield acc.findOne({ userId: req.body.userId, name: req.body.name });
+            if (existAcc) {
+                // eslint-disable-next-line max-len
+                res.send((0, ApiResponse_1.default)({ error: true, description: 'An account with the same name and user already exists.', status: 500 }));
+            }
+            else {
+                // No existing account found, save the new account
+                const accs = yield accounts.save();
+                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: accs }));
+            }
         }
     }));
-    account.delete('/:id', (req, res) => {
-        acc.findOneAndRemove({ _id: req.params.id }).
-            then((removedList) => {
-            res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
-        });
-    });
+    account.delete('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
+        const removedList = yield acc.findOneAndRemove({ _id: req.params.id });
+        res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
+    }));
     return account;
 };
 exports.default = accountRouter;
