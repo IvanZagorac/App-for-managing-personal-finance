@@ -1,10 +1,8 @@
+/* eslint-disable max-len */
 import { Button, Container, Nav, Navbar, Row } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import DecodedToken from '../model/Auth/token';
 
-
-// eslint-disable-next-line max-len
-function MainMenu({ hasToken, fullName, setDecodedToken }: { hasToken: boolean; fullName:string | undefined; setDecodedToken: React.Dispatch<React.SetStateAction<DecodedToken>> })
+function MainMenu(decodedToken:any)
 {
     const navigate = useNavigate();
 
@@ -16,16 +14,14 @@ function MainMenu({ hasToken, fullName, setDecodedToken }: { hasToken: boolean; 
     const doLogout=()=> 
     {
         localStorage.removeItem('token');
-        setDecodedToken(prev => ({
-            ...prev,value:null, isExpire:true, isExist:false
-        }));
+        navigate('/');
     }
 
 
     return (
         <Navbar className='menu' expand="lg">
             <Container>
-                <Navbar.Brand className='nav-link' >{fullName}</Navbar.Brand>
+                <Navbar.Brand className='nav-link' >{decodedToken.decodedToken.value?.fullName}</Navbar.Brand>
                 <Navbar.Toggle aria-controls="basic-navbar-nav" />
                 <Navbar.Collapse id="basic-navbar-nav" className="nav-item">
                     <Nav>
@@ -37,7 +33,7 @@ function MainMenu({ hasToken, fullName, setDecodedToken }: { hasToken: boolean; 
                         </Nav.Item>
                     </Nav>
                     <Nav>
-                        {hasToken && (
+                        {decodedToken.decodedToken.isExist && (
                             <Nav.Item className='nav-btn'>
                                 <Button className='btn-logout' variant="danger" onClick={doLogout}>Logout</Button>
                             </Nav.Item>

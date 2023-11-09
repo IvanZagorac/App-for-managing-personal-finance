@@ -2,10 +2,9 @@
 import { Button, Col, Container,Row } from 'react-bootstrap'
 import { Pagination } from 'react-bootstrap';
 import MainMenu from '../MainMenu'
-import { RefObject, useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { togetherFunction } from '../../config/token';
 import { useNavigate, useParams } from 'react-router-dom';
-import DecodedToken from '../../model/Auth/token';
 import TransactionModal from './TransactionModal';
 import CategoryModal from './CategoryModal';
 import axios from 'axios';
@@ -45,11 +44,7 @@ function TransactionPage()
         totalAmount:0,
     })
     const[categoryModal,setCategoryModal]=useState<boolean>(false);
-    const[decodedToken,setDecodedToken] = useState<DecodedToken>({
-        value: null,
-        isExpire: false,
-        isExist: true,
-    })
+    const token = togetherFunction();
     
     const handleModal =(setModal:any,trueOrFalse:boolean,currTrans:PopulatedTransaction | null)=>
     {
@@ -165,24 +160,21 @@ function TransactionPage()
 
     useEffect(()=>
     {
-        setDecodedToken(togetherFunction());
         getAccountById();
         getAllTransactions();
 
-        if (!decodedToken.isExist || decodedToken.isExpire)
+        if (!token.isExist || token.isExpire)
         {
             navigate('/');
         }
         
-    },[decodedToken.isExpire, decodedToken.isExist,currentPage,isEdit,account.totalAmount])
+    },[currentPage,isEdit,account.totalAmount])
 
     return(
             
         <>
-            {
-                // eslint-disable-next-line max-len
-                <MainMenu hasToken={decodedToken.isExist} fullName={decodedToken.value?.fullName} setDecodedToken={setDecodedToken} />
-            }
+            
+            <MainMenu decodedToken={token} />
        
             <Container className="cont">
                 <Row className="w-100">
@@ -224,7 +216,7 @@ function TransactionPage()
                         </div>
                     </Col> */}
                     <Col lg="12" sm="12" className='trans-field'>
-                        <div className={transactions.length != 0 ? '' : 'd-none'}>
+                        <div className={!noDataMsg && noDataMsg.length == 0 ? '' : 'd-none'}>
                             <Pagination className='custom-pagination'>
                                 <Pagination.First 
                                     onClick={() => handlePageChange(1)}  

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Col, Form, Modal } from 'react-bootstrap';
+import { Alert, Button, Col, Form, Modal } from 'react-bootstrap';
 import { SubmitHandler, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -53,12 +53,19 @@ function RegistrationModal({ registerModal, setRegisterModal }:any)
             password:data.password,
             fullName:data.fullName,
         });
-        const token = response.data.resData.token;
-        localStorage.setItem('token', token);
-        navigate('account');
-        setUserRegistration({ ...userRegistration, password: '', email: '' ,fullName: ''});
-        setMessage('');
-        setRegisterModal(false)
+        if (response.data.error && response.data.description)
+        {
+            setMessage(response.data.description)
+        }
+        else
+        {
+            const token = response.data.resData.token;
+            localStorage.setItem('token', token);
+            navigate('account');
+            setUserRegistration({ ...userRegistration, password: '', email: '' ,fullName: ''});
+            setMessage('');
+            setRegisterModal(false)
+        }
 
     }
 
@@ -174,6 +181,7 @@ function RegistrationModal({ registerModal, setRegisterModal }:any)
                     </Col>
 
                 </Form>
+                <Alert variant="danger" className={message ? '' : 'd-none'}>{message}</Alert>
             </Modal.Body>
         </Modal> 
     )

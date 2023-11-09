@@ -13,9 +13,8 @@ const accountRouter = function(express,acc):Router
     {
         try
         {
-            // const userId = req.query.userId;
-            // const uId = new BSON.ObjectId(userId);
-            const accounts = await acc.find({}).sort({ createdAt: -1 });
+            const userId = req.query.userId;
+            const accounts = await acc.find({userId}).sort({ createdAt: -1 });
 
             if (accounts.length != 0)
             {

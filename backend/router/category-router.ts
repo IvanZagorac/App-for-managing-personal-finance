@@ -12,14 +12,13 @@ const categoryRouter = function(express,cat):Router
         try
         {
             const page = parseInt(req.query.currentPage,10) || 1; 
-            // const userId = req.query.userId;
-            // const uId = new BSON.ObjectId(userId);
+            const userId = req.query.userId;
             const perPage = 10;
 
             const totalCount =  await cat
-                .find({isDeposit:req.query.filterIsDeposit}).countDocuments();
+                .find({isDeposit:req.query.filterIsDeposit,userId}).countDocuments();
             const allCategories = await cat
-                .find({isDeposit:req.query.filterIsDeposit})
+                .find({isDeposit:req.query.filterIsDeposit,userId})
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * perPage)
                 .limit(perPage);
@@ -65,8 +64,8 @@ const categoryRouter = function(express,cat):Router
 
     category.get('',async(req,res)=>
     {
-
-        const allCategories = await  cat.find({}).sort({ createdAt: -1 });
+        const userId = req.query.userId;
+        const allCategories = await  cat.find({userId}).sort({ createdAt: -1 });
         if (allCategories.length != 0)
         {
             res.send

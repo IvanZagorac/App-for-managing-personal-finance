@@ -50,40 +50,53 @@ const authRouter = function (express, User) {
                 }
             }
             catch (e) {
-                throw new Error('PROBLEM WITH LOGIN');
+                throw new Error(e);
             }
         });
     });
     auth.post('/register', function (req, res) {
         return __awaiter(this, void 0, void 0, function* () {
-            const salt = yield bcrypt_1.default.genSalt(10);
-            const hashedPassword = yield bcrypt_1.default.hash(req.body.password, salt);
-            if (!hashedPassword) {
-                res.send((0, ApiResponse_1.default)({ error: true, description: 'Cannot hashed password', status: 301 }));
+            try {
+                const salt = yield bcrypt_1.default.genSalt(10);
+                const hashedPassword = yield bcrypt_1.default.hash(req.body.password, salt);
+                if (!hashedPassword) {
+                    res.send((0, ApiResponse_1.default)({ error: true, description: 'Cannot hashed password', status: 301 }));
+                }
+                const rows = yield User.find({
+                    email: req.body.email
+                });
+                if (rows.length != 0) {
+                    res.send((0, ApiResponse_1.default)({ error: true, description: 'User with this email already exist', status: 401 }));
+                }
+                else {
+                    const email = req.body.email;
+                    const fullName = req.body.fullName;
+                    const newUser = new User({
+                        email,
+                        fullName,
+                        password: hashedPassword
+                    });
+                    const user = yield newUser.save();
+                    const token = jsonwebtoken_1.default.sign({
+                        _id: user._id,
+                        email,
+                        fullName,
+                    }, config_1.config.secret, {
+                        expiresIn: '6h',
+                    });
+                    if (!token) {
+                        res.send((0, ApiResponse_1.default)({ error: true, description: 'Token does not exists', status: 302 }));
+                    }
+                    res.send((0, ApiResponse_1.default)({
+                        error: false,
+                        status: 205,
+                        resData: { token, user }
+                    }));
+                }
             }
-            const email = req.body.email;
-            const fullName = req.body.fullName;
-            const newUser = new User({
-                email,
-                fullName,
-                password: hashedPassword
-            });
-            const user = yield newUser.save();
-            const token = jsonwebtoken_1.default.sign({
-                _id: user._id,
-                email,
-                fullName,
-            }, config_1.config.secret, {
-                expiresIn: '6h',
-            });
-            if (!token) {
-                res.send((0, ApiResponse_1.default)({ error: true, description: 'Token does not exists', status: 302 }));
+            catch (e) {
+                throw new Error(e);
             }
-            res.send((0, ApiResponse_1.default)({
-                error: false,
-                status: 205,
-                resData: { token, user }
-            }));
         });
     });
     return auth;

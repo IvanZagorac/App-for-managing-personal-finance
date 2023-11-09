@@ -9,6 +9,7 @@ import Category from '../../model/Category/category';
 import ajvMess from '../../model/Auth/ajv';
 import PopulatedTransaction from '../../model/Transaction/populatedTransaction';
 import AccountById from '../../model/Account/accountById';
+import { togetherFunction } from '../../config/token';
 
 function TransactionModal({ transactionModal, setTransactionModal, currTransaction, isEdit,setCurrTransaction, fetchAllTransactions,currTransPrize,account,setAccount}: 
     { 
@@ -22,7 +23,7 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
         account:AccountById,
         setAccount:React.Dispatch<React.SetStateAction<AccountById>> 
 
-        })
+    })
 {
     const[errorMessage,setErrorMessage] =useState<ajvMess[]>([]);
     const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
@@ -42,10 +43,14 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
         transactionPrize:0,
         isDeposit:false,
     })
+    const token = togetherFunction();
 
     const getAllCategories=async()=>
     {
-        const response = await axios.get(config.pool+'category')
+        const userId = token.value?._id;
+        const response = await axios.get(config.pool+'category',{
+            params: { userId }
+        })
         setCategories(response.data.resData);
     }
 

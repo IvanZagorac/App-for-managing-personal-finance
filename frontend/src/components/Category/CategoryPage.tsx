@@ -14,11 +14,11 @@ import Category from '../../model/Category/category';
 function CategoryPage()
 {
 
-    const[decodedToken,setDecodedToken] = useState<DecodedToken>({
-        value: null,
-        isExpire: false,
-        isExist: true,
-    })
+    // const[decodedToken,setDecodedToken] = useState<DecodedToken>({
+    //     value: null,
+    //     isExpire: false,
+    //     isExist: true,
+    // })
     const[allCategories,setAllCategories] = useState<Category[]>([])
     const[category,setCateogry]=useState<Category>({
         _id:'',
@@ -36,15 +36,11 @@ function CategoryPage()
     const[errorMessage,setErrorMessage] =useState<ajvMess[]>([]);
     const navigate = useNavigate();
 
+    const token = togetherFunction();
     const upsertCategory = async()=>
     {
         try
         {
-            // let userId:string | null = null;
-            // if (decodedToken.value != null)
-            // {
-            //     userId = decodedToken.value._id;
-            // }
             let responseBody:any;
             if (isEdit)
             {
@@ -60,7 +56,7 @@ function CategoryPage()
                 responseBody = {
                     name:category.name,
                     isDeposit:category.isDeposit,
-                    userId:decodedToken.value?._id
+                    userId:token.value?._id
                 }
                 
             }
@@ -88,8 +84,7 @@ function CategoryPage()
 
     const getAllCategories=async ()=>
     {
-        const userId = decodedToken.value?._id;
-        console.log(decodedToken.value);
+        const userId = token.value?._id;
         const response = await axios.get(config.pool+'category/filterDeposit',{
             params: { filterIsDeposit, userId, currentPage }
         })
@@ -175,40 +170,21 @@ function CategoryPage()
     
     useEffect(()=>
     {
-        setDecodedToken(togetherFunction());
-        // getAllCategories();
-        // setDecodedToken(togetherFunction());
-        // console.log(decodedToken);
+        getAllCategories();
 
-        // if (!decodedToken.isExist || decodedToken.isExpire)
-        // {
-        //     navigate('/');
-        // } 
-
-        const idt = setTimeout(() => 
+        if (!token.isExist || token.isExpire)
         {
-            getAllCategories();
-            
-
-            if (!decodedToken.isExist || decodedToken.isExpire)
-            {
-                navigate('/');
-            } 
-        }, 500);
-        return () => 
-        {
-            console.log('CLEANUP');
-            clearTimeout(idt);
-        };
+            navigate('/');
+        } 
         
-    },[decodedToken.isExpire, decodedToken.isExist,filterIsDeposit,isEdit,currentPage])
+    },[filterIsDeposit,isEdit,currentPage])
 
     return(
         <>
             {
-                // eslint-disable-next-line max-len
-                <MainMenu hasToken={decodedToken.isExist} fullName={decodedToken.value?.fullName} setDecodedToken={setDecodedToken} />
+                <MainMenu decodedToken={token}/>
             }
+           
             <Container className="cont">
                 <Row className="header-cat">
                     <Col lg="4" sm="4" className='first-col'>
@@ -229,7 +205,7 @@ function CategoryPage()
                 </Row>
                 <Row className="w-100">
                     <Col lg="12" sm="12" className='trans-field'>
-                        <div className={allCategories.length != 0 ? '' : 'd-none'}>
+                        <div className={!noDataMsg && noDataMsg.length == 0 ? '' : 'd-none'}>
                             <Pagination className='custom-pagination'>
                                 <Pagination.First 
                                     onClick={() => handlePageChange(1)}  
@@ -272,7 +248,7 @@ function CategoryPage()
                             (
                                 allCategories.map((cat) => 
                                 {
-                                    if (decodedToken.value && cat.userId === decodedToken.value._id ) 
+                                    if (token.value && cat.userId === token.value._id ) 
                                     {
                                         return (
                                             <>

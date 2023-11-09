@@ -20,13 +20,12 @@ const categoryRouter = function (express, cat) {
     category.get('/filterDeposit', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             const page = parseInt(req.query.currentPage, 10) || 1;
-            // const userId = req.query.userId;
-            // const uId = new BSON.ObjectId(userId);
+            const userId = req.query.userId;
             const perPage = 10;
             const totalCount = yield cat
-                .find({ isDeposit: req.query.filterIsDeposit }).countDocuments();
+                .find({ isDeposit: req.query.filterIsDeposit, userId }).countDocuments();
             const allCategories = yield cat
-                .find({ isDeposit: req.query.filterIsDeposit })
+                .find({ isDeposit: req.query.filterIsDeposit, userId })
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * perPage)
                 .limit(perPage);
@@ -55,7 +54,8 @@ const categoryRouter = function (express, cat) {
         }
     }));
     category.get('', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const allCategories = yield cat.find({}).sort({ createdAt: -1 });
+        const userId = req.query.userId;
+        const allCategories = yield cat.find({ userId }).sort({ createdAt: -1 });
         if (allCategories.length != 0) {
             res.send((0, ApiResponse_1.default)({
                 error: false,

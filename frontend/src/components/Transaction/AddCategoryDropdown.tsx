@@ -20,7 +20,6 @@ const CategoryDropdown = ({ categories, isDeposit, onCategorySelect, setIsDeposi
 
     const handleCategorySelect = (category:Category | null) => 
     {
-        console.log(category);
         setSelectedCategory(category);
         onCategorySelect(category?._id);
     };

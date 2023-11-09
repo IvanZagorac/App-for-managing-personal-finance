@@ -19,9 +19,8 @@ const accountRouter = function (express, acc) {
     const account = express.Router();
     account.get('', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
-            // const userId = req.query.userId;
-            // const uId = new BSON.ObjectId(userId);
-            const accounts = yield acc.find({}).sort({ createdAt: -1 });
+            const userId = req.query.userId;
+            const accounts = yield acc.find({ userId }).sort({ createdAt: -1 });
             if (accounts.length != 0) {
                 res.send((0, ApiResponse_1.default)({
                     error: false,

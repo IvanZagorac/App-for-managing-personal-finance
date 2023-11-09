@@ -5,18 +5,12 @@ import MainMenu from '../MainMenu';
 import Account from '../../model/Account/account';
 import { config } from '../../config/config';
 import axios from 'axios';
-import DecodedToken from '../../model/Auth/token';
 import { togetherFunction } from '../../config/token';
 import ajvMess from '../../model/Auth/ajv';
 
 function AccountPage()
 {
 
-    const[decodedToken,setDecodedToken] = useState<DecodedToken>({
-        value: null,
-        isExpire: false,
-        isExist: true,
-    })
     const[allAccounts,setAllAccounts] = useState<Account[]>([])
     const[accountModal,setAccountModal] = useState<boolean>(false);
     const[noDataMsg,setNoDataMsg] = useState<string>('');
@@ -28,16 +22,16 @@ function AccountPage()
         totalAmount:0,
     })
     const navigate = useNavigate();
+    const token = togetherFunction();
 
     const addAccount = async()=>
     {
         try
         {
             let userId:string | null = null;
-            console.log(decodedToken.value?._id);
-            if (decodedToken.value != null)
+            if (token.value != null)
             {
-                userId = decodedToken.value._id;
+                userId = token.value._id;
             }
             const response = await axios.post(config.pool + 'account', {
                 userId,
@@ -67,9 +61,9 @@ function AccountPage()
 
     const getAllAccounts=async ()=>
     {
-        const userId = decodedToken.value?._id;
+        const userId = token.value?._id;
         const response = await axios.get(config.pool+'account',{
-            params: { userId}
+            params: { userId }
         })
         if (response.data.error)
         {
@@ -108,23 +102,18 @@ function AccountPage()
     useEffect(()=>
     {
         getAllAccounts();
-        setDecodedToken(togetherFunction());
 
-        if (!decodedToken.isExist || decodedToken.isExpire)
+        if (!token.isExist || token.isExpire)
         {
             navigate('/');
         }
         
-    },[decodedToken.isExpire, decodedToken.isExist])
-
-    //hasToken={isLogin} setIsLogin={setIsLogin}
+    },[])
 
     return(
         <>
-            {
-                // eslint-disable-next-line max-len
-                <MainMenu hasToken={decodedToken.isExist} fullName={decodedToken.value?.fullName} setDecodedToken={setDecodedToken} />
-            }
+            
+            <MainMenu decodedToken={token}/>
             <Container className="cont">
                 <Row className="w-100">
                     <Col lg="6" sm="6" className='first-col'>
@@ -147,7 +136,7 @@ function AccountPage()
                             (
                                 allAccounts.map((acc) => 
                                 {
-                                    if (decodedToken.value && acc.userId === decodedToken.value._id ) 
+                                    if (token.value && acc.userId === token.value._id ) 
                                     {
                                         return (
                                             <>

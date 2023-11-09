@@ -57,53 +57,71 @@ const authRouter= function(express,User):Router
 
         catch (e)
         {
-            throw new Error('PROBLEM WITH LOGIN');
+            throw new Error(e);
         }
 
     });
 
     auth.post('/register', async function(req,res)
     {
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(req.body.password, salt)
-
-        if (!hashedPassword)
+        try
         {
-            res.send(ApiResponse({error: true, description: 'Cannot hashed password', status: 301}));
-        }
-        
-        const email=req.body.email;
-        const fullName=req.body.fullName;
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(req.body.password, salt)
 
-        const newUser=new User({
-            email,
-            fullName,
-            password:hashedPassword
-        })
-        const user = await newUser.save();
-
-        const token = jwt.sign({
-            _id:user._id,
-            email,
-            fullName,
-        },
-        config.secret, {
-            expiresIn: '6h',
-        });
-
-        if (!token)
-        {
-            res.send(ApiResponse({error: true, description: 'Token does not exists', status: 302}));
-        }
-
-        res.send
-        (
-            ApiResponse({
-                error: false,
-                status: 205, 
-                resData:{token,user}
+            if (!hashedPassword)
+            {
+                res.send(ApiResponse({error: true, description: 'Cannot hashed password', status: 301}));
+            }
+            const rows = await User.find({
+                email:req.body.email
             })
-        )
+
+            if (rows.length != 0)
+            {
+                res.send(ApiResponse({error: true, description:'User with this email already exist', status: 401}));
+            }
+            else
+            {
+                const email=req.body.email;
+                const fullName=req.body.fullName;
+    
+                const newUser=new User({
+                    email,
+                    fullName,
+                    password:hashedPassword
+                })
+                const user = await newUser.save();
+    
+                const token = jwt.sign({
+                    _id:user._id,
+                    email,
+                    fullName,
+                },
+                config.secret, {
+                    expiresIn: '6h',
+                });
+    
+                if (!token)
+                {
+                    res.send(ApiResponse({error: true, description: 'Token does not exists', status: 302}));
+                }
+    
+                res.send
+                (
+                    ApiResponse({
+                        error: false,
+                        status: 205, 
+                        resData:{token,user}
+                    })
+                )
+            }
+           
+        }
+        catch(e)
+        {
+            throw new Error(e);
+        }
 
     });
     return auth;
