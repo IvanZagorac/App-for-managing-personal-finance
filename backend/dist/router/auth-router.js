@@ -63,7 +63,14 @@ const authRouter = function (express, User) {
             }
             const email = req.body.email;
             const fullName = req.body.fullName;
+            const newUser = new User({
+                email,
+                fullName,
+                password: hashedPassword
+            });
+            const user = yield newUser.save();
             const token = jsonwebtoken_1.default.sign({
+                _id: user._id,
                 email,
                 fullName,
             }, config_1.config.secret, {
@@ -72,18 +79,11 @@ const authRouter = function (express, User) {
             if (!token) {
                 res.send((0, ApiResponse_1.default)({ error: true, description: 'Token does not exists', status: 302 }));
             }
-            const newUser = new User({
-                email,
-                fullName,
-                password: hashedPassword
-            });
-            newUser.save().then(users => {
-                res.send((0, ApiResponse_1.default)({
-                    error: false,
-                    status: 205,
-                    resData: { token, user: users }
-                }));
-            });
+            res.send((0, ApiResponse_1.default)({
+                error: false,
+                status: 205,
+                resData: { token, user }
+            }));
         });
     });
     return auth;

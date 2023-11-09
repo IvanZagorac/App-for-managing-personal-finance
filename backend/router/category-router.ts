@@ -12,14 +12,14 @@ const categoryRouter = function(express,cat):Router
         try
         {
             const page = parseInt(req.query.currentPage,10) || 1; 
-            const userId = req.query.userId;
-            const cId = new BSON.ObjectId(userId);
+            // const userId = req.query.userId;
+            // const uId = new BSON.ObjectId(userId);
             const perPage = 10;
 
             const totalCount =  await cat
-                .find({isDeposit:req.query.filterIsDeposit, cId}).countDocuments();
+                .find({isDeposit:req.query.filterIsDeposit}).countDocuments();
             const allCategories = await cat
-                .find({isDeposit:req.query.filterIsDeposit, cId})
+                .find({isDeposit:req.query.filterIsDeposit})
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * perPage)
                 .limit(perPage);

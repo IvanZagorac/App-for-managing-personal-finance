@@ -20,13 +20,13 @@ const categoryRouter = function (express, cat) {
     category.get('/filterDeposit', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
             const page = parseInt(req.query.currentPage, 10) || 1;
-            const userId = req.query.userId;
-            const cId = new mongodb_1.BSON.ObjectId(userId);
+            // const userId = req.query.userId;
+            // const uId = new BSON.ObjectId(userId);
             const perPage = 10;
             const totalCount = yield cat
-                .find({ isDeposit: req.query.filterIsDeposit, cId }).countDocuments();
+                .find({ isDeposit: req.query.filterIsDeposit }).countDocuments();
             const allCategories = yield cat
-                .find({ isDeposit: req.query.filterIsDeposit, cId })
+                .find({ isDeposit: req.query.filterIsDeposit })
                 .sort({ createdAt: -1 })
                 .skip((page - 1) * perPage)
                 .limit(perPage);

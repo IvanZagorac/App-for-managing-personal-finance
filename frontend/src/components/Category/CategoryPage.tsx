@@ -89,6 +89,7 @@ function CategoryPage()
     const getAllCategories=async ()=>
     {
         const userId = decodedToken.value?._id;
+        console.log(decodedToken.value);
         const response = await axios.get(config.pool+'category/filterDeposit',{
             params: { filterIsDeposit, userId, currentPage }
         })
@@ -171,15 +172,34 @@ function CategoryPage()
         }
     }
 
+    
     useEffect(()=>
     {
-        getAllCategories();
         setDecodedToken(togetherFunction());
+        // getAllCategories();
+        // setDecodedToken(togetherFunction());
+        // console.log(decodedToken);
 
-        if (!decodedToken.isExist || decodedToken.isExpire)
+        // if (!decodedToken.isExist || decodedToken.isExpire)
+        // {
+        //     navigate('/');
+        // } 
+
+        const idt = setTimeout(() => 
         {
-            navigate('/');
-        } 
+            getAllCategories();
+            
+
+            if (!decodedToken.isExist || decodedToken.isExpire)
+            {
+                navigate('/');
+            } 
+        }, 500);
+        return () => 
+        {
+            console.log('CLEANUP');
+            clearTimeout(idt);
+        };
         
     },[decodedToken.isExpire, decodedToken.isExist,filterIsDeposit,isEdit,currentPage])
 
@@ -252,22 +272,25 @@ function CategoryPage()
                             (
                                 allCategories.map((cat) => 
                                 {
-                                    return (
-                                        <>
-                                            <div style={{borderBottom:'1px solid white ', display:'flex',marginBottom:'30px'}}>
-                                                <Col lg="6" sm="6" className='trans-field'>
-                                                    <p>{cat.name}</p>
-                                                </Col>
-                                                <Col lg="6" sm="6" className='trans-field'>
-                                                    {
+                                    if (decodedToken.value && cat.userId === decodedToken.value._id ) 
+                                    {
+                                        return (
+                                            <>
+                                                <div style={{borderBottom:'1px solid white ', display:'flex',marginBottom:'30px'}}>
+                                                    <Col lg="6" sm="6" className='trans-field'>
+                                                        <p>{cat.name}</p>
+                                                    </Col>
+                                                    <Col lg="6" sm="6" className='trans-field'>
+                                                        {
                                                         // <Button className='card-header-btn' variant='danger' onClick={()=>deleteCategory(cat._id)}>Remove</Button>
-                                                    }
-                                                    <Button onClick={()=> handleModal(setCategoryModal,true,cat)} className='acc-add-btn' variant='primary'>Edit Category</Button>
-                                                </Col>
-                                            </div>
+                                                        }
+                                                        <Button onClick={()=> handleModal(setCategoryModal,true,cat)} className='acc-add-btn' variant='primary'>Edit Category</Button>
+                                                    </Col>
+                                                </div>
                                   
-                                        </>
-                                    );
+                                            </>
+                                        );
+                                    }
                                 })
                             )
                             

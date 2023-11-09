@@ -75,7 +75,15 @@ const authRouter= function(express,User):Router
         const email=req.body.email;
         const fullName=req.body.fullName;
 
+        const newUser=new User({
+            email,
+            fullName,
+            password:hashedPassword
+        })
+        const user = await newUser.save();
+
         const token = jwt.sign({
+            _id:user._id,
             email,
             fullName,
         },
@@ -87,23 +95,15 @@ const authRouter= function(express,User):Router
         {
             res.send(ApiResponse({error: true, description: 'Token does not exists', status: 302}));
         }
-        
-        const newUser=new User({
-            email,
-            fullName,
-            password:hashedPassword
-        })
-        newUser.save().then(users=>
-        {
-            res.send
-            (
-                ApiResponse({
-                    error: false,
-                    status: 205, 
-                    resData:{token,user:users}
-                })
-            )
-        })
+
+        res.send
+        (
+            ApiResponse({
+                error: false,
+                status: 205, 
+                resData:{token,user}
+            })
+        )
 
     });
     return auth;

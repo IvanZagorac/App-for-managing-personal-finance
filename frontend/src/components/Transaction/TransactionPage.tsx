@@ -114,6 +114,38 @@ function TransactionPage()
         });
     }
 
+    // const lineGraph = () =>
+    // {
+    //     if (chartRef.current) 
+    //     {
+    //         const ctx = chartRef.current.getContext('2d');
+      
+    //         // Extract data for the graph from your transactions state
+    //         const months = transactions.map((transaction) => moment(transaction.time).format('MMMM'));
+    //         const totalAmounts = transactions.map((transaction) => transaction.totalAmount);
+      
+    //         // Create the line chart
+    //         new Chart(ctx, {
+    //             type: 'line',
+    //             data: {
+    //                 labels: months,
+    //                 datasets: [
+    //                     {
+    //                         label: 'Total Amount',
+    //                         data: totalAmounts,
+    //                         borderColor: 'blue', // Color for the line
+    //                         fill: false, // Don't fill the area under the line
+    //                     },
+    //                 ],
+    //             },
+    //             options: {
+    //                 responsive: true,
+    //                 maintainAspectRatio: false, // Set to false to control the chart size yourself
+    //             },
+    //         });
+    //     }
+    // }
+
     const deleteTransaction = async(trans:PopulatedTransaction | null)=>
     {
         let total = account.totalAmount;

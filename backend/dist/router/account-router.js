@@ -18,21 +18,50 @@ const mongodb_1 = require("mongodb");
 const accountRouter = function (express, acc) {
     const account = express.Router();
     account.get('', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const accounts = yield acc.find({}).sort({ createdAt: -1 });
-        res.send((0, ApiResponse_1.default)({
-            error: false,
-            status: 200,
-            resData: accounts
-        }));
+        try {
+            // const userId = req.query.userId;
+            // const uId = new BSON.ObjectId(userId);
+            const accounts = yield acc.find({}).sort({ createdAt: -1 });
+            if (accounts.length != 0) {
+                res.send((0, ApiResponse_1.default)({
+                    error: false,
+                    status: 200,
+                    resData: accounts
+                }));
+            }
+            else {
+                res.send((0, ApiResponse_1.default)({
+                    error: true,
+                    status: 404,
+                    description: 'Data not found'
+                }));
+            }
+        }
+        catch (e) {
+            res.send((0, ApiResponse_1.default)({
+                error: true,
+                status: 500,
+                description: 'Error fetching accounts'
+            }));
+        }
     }));
     account.patch('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const accountId = req.params.id;
-        const accounts = yield acc.findOneAndUpdate({ _id: accountId }, { $set: { totalAmount: req.body.totalAm } });
-        res.send((0, ApiResponse_1.default)({
-            error: false,
-            status: 200,
-            resData: accounts
-        }));
+        try {
+            const accountId = req.params.id;
+            const accounts = yield acc.findOneAndUpdate({ _id: accountId }, { $set: { totalAmount: req.body.totalAm } });
+            res.send((0, ApiResponse_1.default)({
+                error: false,
+                status: 200,
+                resData: accounts
+            }));
+        }
+        catch (e) {
+            res.send((0, ApiResponse_1.default)({
+                error: true,
+                status: 500,
+                description: 'Error patching accounts'
+            }));
+        }
     }));
     account.get('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
         const accountId = req.params.id;
@@ -54,59 +83,68 @@ const accountRouter = function (express, acc) {
         }
     }));
     account.post('', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const schema = {
-            type: 'object',
-            properties: {
-                name: {
-                    type: 'string',
-                    minLength: 4,
-                },
-                userId: {
-                    type: 'object',
-                    properties: {
-                        userId: { type: 'string', pattern: '^[a-f\\d]{24}$' },
+        try {
+            const schema = {
+                type: 'object',
+                properties: {
+                    name: {
+                        type: 'string',
+                        minLength: 4,
                     },
+                    userId: {
+                        type: 'object',
+                        properties: {
+                            userId: { type: 'string', pattern: '^[a-f\\d]{24}$' },
+                        },
+                    },
+                    totalAmount: { type: 'integer' },
                 },
-                totalAmount: { type: 'integer' },
-            },
-            required: ['name', 'userId', 'totalAmount',],
-        };
-        const accounts = new acc({
-            userId: req.body.userId,
-            name: req.body.name,
-            totalAmount: req.body.totalAmount,
-        });
-        const ajv = new ajv_1.default();
-        const validate = ajv.compile(schema);
-        const valid = validate(accounts);
-        const nid = new mongodb_1.BSON.ObjectId(req.body.userId);
-        const findByUserId = yield acc.find({ userId: nid });
-        const arr = [];
-        let existsTwoAcc = false;
-        if (Object.keys(findByUserId).length >= 2) {
-            arr.push({ var: 'An account', message: 'must NOT have more than 2 accounts' });
-            existsTwoAcc = true;
-        }
-        if (existsTwoAcc) {
-            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
-        }
-        if (!valid) {
-            for (const [key, value] of Object.entries(validate.errors)) {
-                arr.push({ var: value.instancePath, message: value.message });
+                required: ['name', 'userId', 'totalAmount',],
+            };
+            const accounts = new acc({
+                userId: req.body.userId,
+                name: req.body.name,
+                totalAmount: req.body.totalAmount,
+            });
+            const ajv = new ajv_1.default();
+            const validate = ajv.compile(schema);
+            const valid = validate(accounts);
+            const nid = new mongodb_1.BSON.ObjectId(req.body.userId);
+            const findByUserId = yield acc.find({ userId: nid });
+            const arr = [];
+            let existsTwoAcc = false;
+            if (Object.keys(findByUserId).length >= 2) {
+                arr.push({ var: 'An account', message: 'must NOT have more than 2 accounts' });
+                existsTwoAcc = true;
             }
-            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
-        }
-        else {
-            const existAcc = yield acc.findOne({ userId: req.body.userId, name: req.body.name });
-            if (existAcc) {
-                // eslint-disable-next-line max-len
-                res.send((0, ApiResponse_1.default)({ error: true, description: 'An account with the same name and user already exists.', status: 500 }));
+            if (existsTwoAcc) {
+                res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
+            }
+            if (!valid) {
+                for (const [key, value] of Object.entries(validate.errors)) {
+                    arr.push({ var: value.instancePath, message: value.message });
+                }
+                res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
             }
             else {
-                // No existing account found, save the new account
-                const accs = yield accounts.save();
-                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: accs }));
+                const existAcc = yield acc.findOne({ userId: req.body.userId, name: req.body.name });
+                if (existAcc) {
+                    // eslint-disable-next-line max-len
+                    res.send((0, ApiResponse_1.default)({ error: true, description: 'An account with the same name and user already exists.', status: 500 }));
+                }
+                else {
+                    // No existing account found, save the new account
+                    const accs = yield accounts.save();
+                    res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: accs }));
+                }
             }
+        }
+        catch (e) {
+            res.send((0, ApiResponse_1.default)({
+                error: true,
+                status: 500,
+                description: 'Error fetching accounts'
+            }));
         }
     }));
     account.delete('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {

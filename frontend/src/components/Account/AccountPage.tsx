@@ -34,6 +34,7 @@ function AccountPage()
         try
         {
             let userId:string | null = null;
+            console.log(decodedToken.value?._id);
             if (decodedToken.value != null)
             {
                 userId = decodedToken.value._id;
@@ -66,7 +67,10 @@ function AccountPage()
 
     const getAllAccounts=async ()=>
     {
-        const response = await axios.get(config.pool+'account')
+        const userId = decodedToken.value?._id;
+        const response = await axios.get(config.pool+'account',{
+            params: { userId}
+        })
         if (response.data.error)
         {
             setNoDataMsg('NO DATA');
