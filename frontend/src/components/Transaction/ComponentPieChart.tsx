@@ -10,7 +10,7 @@ interface DepositPieChartProps {
 
 const ComponentPieChart: React.FC<DepositPieChartProps> = ({ transactions,isDeposit,title }) => 
 {
-    // Filter out only deposit categories
+   
     const depositCategories = transactions
         .filter((transaction) => transaction.categoryId.isDeposit == isDeposit)
         .map((transaction) => transaction.categoryId);

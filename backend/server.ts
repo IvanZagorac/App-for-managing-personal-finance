@@ -17,6 +17,7 @@ import authRouter from './router/auth-router';
 import accountRouter from './router/account-router';
 import  transactionRouter from './router/transaction-router';
 import categoryRouter from './router/category-router';
+const mongooseUrl = process.env.MONGO_URI || config.pool;
 
 
 const init = () =>
@@ -25,7 +26,7 @@ const init = () =>
     try
     {
         const a = config;
-        mongoose.connect(config.pool,
+        mongoose.connect(mongooseUrl,
         {
             useNewUrlParser: true,
             useUnifiedTopology: true,

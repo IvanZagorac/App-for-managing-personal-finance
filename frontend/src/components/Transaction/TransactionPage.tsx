@@ -11,18 +11,14 @@ import axios from 'axios';
 import { config } from '../../config/config';
 import AccountById from '../../model/Account/accountById';
 import moment from 'moment';
-import { format } from 'date-fns';
-import { DateRange } from 'react-date-range';
 import 'react-date-range/dist/styles.css'
 import 'react-date-range/dist/theme/default.css'
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import TransactionAccount from '../../model/Transaction/transactionAccount';
 import LineChart from './LineChart';
 import ComponentPieChart from './ComponentPieChart';
 
-interface Range{
-    startDate: Date | undefined,
-    endDate:  Date | undefined,
-}
 
 function TransactionPage()
 {
@@ -31,16 +27,12 @@ function TransactionPage()
     const {aId} = useParams();
     const[transactionModal,setTransactionModal]=useState<boolean>(false);
     const[transactions,setTransactions]=useState<TransactionAccount[]>([]);
+    const[allTransactions,setAllTransactions]=useState<TransactionAccount[]>([]);
     const[currentTransactionPrize,setCurrentTransactionPrize]=useState<number>(0);
     const[currTrans,setCurrTrans]=useState<TransactionAccount | null>(null);
     const[noDataMsg,setNoDataMsg] = useState<string>('');
-    const [range, setRange] = useState<Range[]>([
-        {
-            startDate: undefined,
-            endDate:  undefined,
-        }
-    ])
-    const [open, setOpen] = useState(false)
+    const[startDate,setStartDate]= useState<Date | null>(null);
+    const[endDate,setEndDate]= useState<Date | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const[totalCount,setTotalCount]=useState<number>(0);
     const[isEdit,setIsEdit] = useState<boolean>(false);
@@ -82,12 +74,14 @@ function TransactionPage()
         try
         {
             const response = await axios.get(config.pool + 'transaction', {
-                params: { currentPage, aId, startDate: range[0].startDate, endDate: range[0].endDate }
+                params: { currentPage, aId, startDate, endDate}
             });
             if (!response.data.error)
             {
-                const transactionsData = response.data.resData;
+                const transactionsData = response.data.resData.transactionList;
+                const allTrans = response.data.resData.allTransactions;
                 setTransactions(transactionsData);
+                setAllTransactions(allTrans);
                 setTotalCount(response.data.totalCount);
                 setNoDataMsg('');
             } 
@@ -132,12 +126,6 @@ function TransactionPage()
         getAllTransactions();
     }
 
-    const handleDateRangeChange = (item:any) => 
-    {
-        console.log(item);
-        setRange([item.range1]);
-    };
-
     useEffect(()=>
     {
         getAccountById();
@@ -148,7 +136,7 @@ function TransactionPage()
             navigate('/');
         }
         
-    },[currentPage,isEdit,account.totalAmount,range])
+    },[currentPage,isEdit,account.totalAmount,startDate,endDate])
 
     return(
             
@@ -186,24 +174,10 @@ function TransactionPage()
                 </Row>
                 <Row className="w-100" >
                     <Col lg="6" sm="6" className='trans-field'>
-                        <input
-                            value={`FILTER BY DATE ${new Date().toLocaleDateString()}`}
-                            readOnly
-                            className="inputBox"
-                            onClick={ () => setOpen(open => !open) }
-                        />
-                        {open && 
-                            <DateRange
-                                editableDateInputs={true}
-                                moveRangeOnFirstSelection={false}
-                                ranges={range ? range : undefined}
-                                months={1}
-                                direction="horizontal"
-                                onChange={handleDateRangeChange}
-                                className="calendarElement"
-                                maxDate={new Date()} 
-                            />
-                        }
+                        <>
+                            <DatePicker maxDate={endDate ? endDate : new Date()} value={ startDate ? startDate.toLocaleDateString() : 'Start date'} className='date-picker' selected={startDate} onChange={(date) => setStartDate(date)}/>
+                            <DatePicker maxDate={new Date()} value={ endDate ? endDate.toLocaleDateString() : 'End date'} className='date-picker'selected={endDate} onChange={(date) => setEndDate(date)} />
+                        </>
    
                     </Col>
                    
@@ -289,10 +263,10 @@ function TransactionPage()
                         !noDataMsg && noDataMsg.length == 0 ?
                             <>
                                 <Col lg="6" sm="6" className='acc-name'>
-                                    <ComponentPieChart transactions={transactions} isDeposit={true} title='Share of deposit categories in transactions'/>
+                                    <ComponentPieChart transactions={allTransactions} isDeposit={true} title='Share of deposit categories in transactions'/>
                                 </Col>
                                 <Col lg="6" sm="6" className='acc-name'>
-                                    <ComponentPieChart transactions={transactions} isDeposit={false} title='Share of widrawal categories in transactions'/>
+                                    <ComponentPieChart transactions={allTransactions} isDeposit={false} title='Share of widrawal categories in transactions'/>
                                 </Col>
                             </>
                             :

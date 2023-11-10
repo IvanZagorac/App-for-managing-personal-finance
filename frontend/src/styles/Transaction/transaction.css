@@ -64,14 +64,14 @@
   color: white !important;
 }
 
-.inputBox {
-  background-color: #024916;
+.date-picker {
+  background-color: #024916 !important;
   color: white;
-  border: 1px solid white;
-  text-align: center;
-  padding: 10px;
-  border-radius: 5%;
-  font-size: 18px;
+  border: 1px solid white !important;
+  text-align: center !important;
+  padding: 10px !important;
+  border-radius: 5% !important;
+  font-size: 18px !important;
 }
 
 .trans-field {

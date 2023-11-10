@@ -25,13 +25,19 @@ const CategoryDropdown = ({ categories, isDeposit, onCategorySelect, setIsDeposi
         onCategorySelect(category?._id);
     };
 
+    const handleOnChange = ()=>
+    {
+        setIsDeposit(!isDeposit);
+        setSelectedCategory(null);
+    }
+
     return (
         <div>
             <Form.Check
                 type="checkbox"
                 label='isDeposit'
                 checked={isDeposit}
-                onChange={() => setIsDeposit(!isDeposit)}
+                onChange={() => handleOnChange()}
                 className="custom-checkbox"
                 id="isDepositCheckbox"
             />

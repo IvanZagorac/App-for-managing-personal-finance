@@ -10,6 +10,7 @@ const config_1 = require("./config/config");
 mongoose_1.default.set('strictQuery', true);
 mongoose_1.default.set('debug', true);
 const express_2 = __importDefault(require("express"));
+const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 const transaction_1 = __importDefault(require("./schema/transaction"));
 const user_1 = __importDefault(require("./schema/user"));
@@ -19,10 +20,11 @@ const auth_router_1 = __importDefault(require("./router/auth-router"));
 const account_router_1 = __importDefault(require("./router/account-router"));
 const transaction_router_1 = __importDefault(require("./router/transaction-router"));
 const category_router_1 = __importDefault(require("./router/category-router"));
+const mongooseUrl = process.env.MONGO_URL || config_1.config.pool;
 const init = () => {
     try {
         const a = config_1.config;
-        mongoose_1.default.connect(config_1.config.pool, {
+        mongoose_1.default.connect(mongooseUrl, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             autoIndex: true,
@@ -41,7 +43,7 @@ const init = () => {
 const initServer = () => {
     app.use(express_2.default.urlencoded({ extended: true }));
     app.use(express_2.default.json());
-    // app.use(express.static(__dirname + '/public'));
+    app.use(express_1.default.static(__dirname + '/public'));
     app.use(function (req, res, next) {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, POST,DELETE,PATCH');
@@ -53,10 +55,9 @@ const initServer = () => {
     app.use('/account', (0, account_router_1.default)(express_1.default, account_1.default));
     app.use('/transaction', (0, transaction_router_1.default)(express_1.default, transaction_1.default));
     app.use('/category', (0, category_router_1.default)(express_1.default, category_1.default));
-    // app.get('*', function (req, res)
-    // {
-    //     res.sendFile(path.join(__dirname + '/public/index.html'));
-    // });
+    app.get('*', function (req, res) {
+        res.sendFile(path_1.default.join(__dirname + '/public/index.html'));
+    });
     app.listen(config_1.config.port);
     console.log('Running on port ' + config_1.config.port);
 };

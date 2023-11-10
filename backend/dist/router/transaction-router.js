@@ -36,7 +36,9 @@ const transactionRouter = function (express, trans) {
                 endDate.setHours(23, 59, 59, 999);
                 query.time.$lte = endDate;
             }
-            const totalCount = yield trans.find(query).countDocuments();
+            const allTransactions = yield trans.find(query)
+                .populate('categoryId');
+            const totalCount = allTransactions.length;
             const transactionList = yield trans.find(query)
                 .sort({ time: -1 })
                 .skip((page - 1) * perPage)
@@ -47,7 +49,7 @@ const transactionRouter = function (express, trans) {
                 res.send((0, ApiResponse_1.default)({
                     error: false,
                     status: 200,
-                    resData: transactionList,
+                    resData: { transactionList, allTransactions },
                     totalCount
                 }));
             }

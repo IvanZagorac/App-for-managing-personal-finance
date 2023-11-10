@@ -115,6 +115,7 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
                     setAccount({ ...account, totalAmount: total })
                     setCurrTransaction(response.data.resData);
                     setTransactionModal(false);
+                    setSelectedCategoryId('');
                     setCurrTransaction({ ...currTransaction,
                         _id:'',
                         accountId: {
@@ -149,6 +150,7 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
                     setAccount({ ...account, totalAmount: total })
                     setTransaction(response.data.resData);
                     setTransactionModal(false);
+                    setSelectedCategoryId('');
                     setTransaction({ ...transaction, accountId: '',
                         categoryId: {
                             _id:'',
@@ -227,7 +229,7 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
             transactionPrize:0,
             isDeposit:false,
         });
-
+        setSelectedCategoryId('');
     }
 
     useEffect(()=>
