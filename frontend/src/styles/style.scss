@@ -19,4 +19,20 @@ body{
   padding: 0;
 }
 
+@media screen and (max-width: 600px) {
+  .formWrapper{
+    max-width: 400px;
+    min-height: 200px;
+  }
+  .registrationPart{
+    top: 90%;
+    h3{
+      font-size: 18px;
+    }
+    button{
+      margin-top: 15px;
+      padding: 5px;
+    }
+  }
+}
 
