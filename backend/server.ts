@@ -71,10 +71,10 @@ const initServer = () =>
     app.use('/transaction', transactionRouter(express, transaction));
     app.use('/category', categoryRouter(express, category));
 
-    // app.get('*', function (req, res)
-    // {
-    //     res.sendFile(path.join(__dirname + '/public/index.html'));
-    // });
+    app.get('*', function (req, res)
+    {
+        res.sendFile(path.join(__dirname + '/public/index.html'));
+    });
 
     app.listen(config.port);
 

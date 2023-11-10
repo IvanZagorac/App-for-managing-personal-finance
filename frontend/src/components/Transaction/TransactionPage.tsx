@@ -186,14 +186,13 @@ function TransactionPage()
                 </Row>
                 <Row className="w-100" >
                     <Col lg="6" sm="6" className='trans-field'>
-                        <div className={!noDataMsg && noDataMsg.length == 0 ? '' : 'd-none'}>
-                            <input
-                                value={`FILTER BY DATE ${new Date().toLocaleDateString()}`}
-                                readOnly
-                                className="inputBox"
-                                onClick={ () => setOpen(open => !open) }
-                            />
-                            {open && 
+                        <input
+                            value={`FILTER BY DATE ${new Date().toLocaleDateString()}`}
+                            readOnly
+                            className="inputBox"
+                            onClick={ () => setOpen(open => !open) }
+                        />
+                        {open && 
                             <DateRange
                                 editableDateInputs={true}
                                 moveRangeOnFirstSelection={false}
@@ -204,8 +203,7 @@ function TransactionPage()
                                 className="calendarElement"
                                 maxDate={new Date()} 
                             />
-                            }
-                        </div>
+                        }
    
                     </Col>
                    
