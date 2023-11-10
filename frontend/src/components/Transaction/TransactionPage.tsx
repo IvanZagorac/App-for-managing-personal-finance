@@ -11,15 +11,18 @@ import axios from 'axios';
 import { config } from '../../config/config';
 import AccountById from '../../model/Account/accountById';
 import moment from 'moment';
-// import { DateRangePickerComponent } from '@syncfusion/ej2-react-calendars';
-import Chart from 'chart.js/auto';
-import 'chart.js/auto';
-import PopulatedTransaction from '../../model/Transaction/populatedTransaction';
+import { format } from 'date-fns';
+import { DateRange } from 'react-date-range';
+import 'react-date-range/dist/styles.css'
+import 'react-date-range/dist/theme/default.css'
+import TransactionAccount from '../../model/Transaction/transactionAccount';
+import LineChart from './LineChart';
+import ComponentPieChart from './ComponentPieChart';
 
-//   interface DateRangePickerData {
-//     startDate: Date | undefined;
-//     endDate: Date | undefined;
-//   }
+interface Range{
+    startDate: Date | undefined,
+    endDate:  Date | undefined,
+}
 
 function TransactionPage()
 {
@@ -27,14 +30,17 @@ function TransactionPage()
     const navigate=useNavigate();
     const {aId} = useParams();
     const[transactionModal,setTransactionModal]=useState<boolean>(false);
-    // const [dateRange, setDateRange] = useState<DateRangePickerData>({
-    //     startDate: undefined,
-    //     endDate: undefined,
-    // });
-    const[transactions,setTransactions]=useState<PopulatedTransaction[]>([]);
+    const[transactions,setTransactions]=useState<TransactionAccount[]>([]);
     const[currentTransactionPrize,setCurrentTransactionPrize]=useState<number>(0);
-    const[currTrans,setCurrTrans]=useState<PopulatedTransaction | null>(null);
+    const[currTrans,setCurrTrans]=useState<TransactionAccount | null>(null);
     const[noDataMsg,setNoDataMsg] = useState<string>('');
+    const [range, setRange] = useState<Range[]>([
+        {
+            startDate: undefined,
+            endDate:  undefined,
+        }
+    ])
+    const [open, setOpen] = useState(false)
     const [currentPage, setCurrentPage] = useState<number>(1);
     const[totalCount,setTotalCount]=useState<number>(0);
     const[isEdit,setIsEdit] = useState<boolean>(false);
@@ -46,7 +52,7 @@ function TransactionPage()
     const[categoryModal,setCategoryModal]=useState<boolean>(false);
     const token = togetherFunction();
     
-    const handleModal =(setModal:any,trueOrFalse:boolean,currTrans:PopulatedTransaction | null)=>
+    const handleModal =(setModal:any,trueOrFalse:boolean,currTrans:TransactionAccount | null)=>
     {
         setModal(true);
         setIsEdit(trueOrFalse);
@@ -76,7 +82,7 @@ function TransactionPage()
         try
         {
             const response = await axios.get(config.pool + 'transaction', {
-                params: { currentPage, aId }
+                params: { currentPage, aId, startDate: range[0].startDate, endDate: range[0].endDate }
             });
             if (!response.data.error)
             {
@@ -109,39 +115,7 @@ function TransactionPage()
         });
     }
 
-    // const lineGraph = () =>
-    // {
-    //     if (chartRef.current) 
-    //     {
-    //         const ctx = chartRef.current.getContext('2d');
-      
-    //         // Extract data for the graph from your transactions state
-    //         const months = transactions.map((transaction) => moment(transaction.time).format('MMMM'));
-    //         const totalAmounts = transactions.map((transaction) => transaction.totalAmount);
-      
-    //         // Create the line chart
-    //         new Chart(ctx, {
-    //             type: 'line',
-    //             data: {
-    //                 labels: months,
-    //                 datasets: [
-    //                     {
-    //                         label: 'Total Amount',
-    //                         data: totalAmounts,
-    //                         borderColor: 'blue', // Color for the line
-    //                         fill: false, // Don't fill the area under the line
-    //                     },
-    //                 ],
-    //             },
-    //             options: {
-    //                 responsive: true,
-    //                 maintainAspectRatio: false, // Set to false to control the chart size yourself
-    //             },
-    //         });
-    //     }
-    // }
-
-    const deleteTransaction = async(trans:PopulatedTransaction | null)=>
+    const deleteTransaction = async(trans:TransactionAccount | null)=>
     {
         let total = account.totalAmount;
         if (trans!.isDeposit)
@@ -158,6 +132,12 @@ function TransactionPage()
         getAllTransactions();
     }
 
+    const handleDateRangeChange = (item:any) => 
+    {
+        console.log(item);
+        setRange([item.range1]);
+    };
+
     useEffect(()=>
     {
         getAccountById();
@@ -168,7 +148,7 @@ function TransactionPage()
             navigate('/');
         }
         
-    },[currentPage,isEdit,account.totalAmount])
+    },[currentPage,isEdit,account.totalAmount,range])
 
     return(
             
@@ -194,28 +174,42 @@ function TransactionPage()
                         <p>{`${account.totalAmount} EUR`}</p>
                     </Col>
                 </Row>
-                <Row className="w-100" >
-                    <Col lg="12" sm="12" className='acc-name'>
-                        <canvas id="lineChart" width="400" height="200"></canvas>
+                <Row className="line-graph" >
+                    <Col lg="12" sm="12" className='col-line-graph'>
+                        {
+                            !noDataMsg && noDataMsg.length == 0 ?
+                                <LineChart transactions={transactions} />
+                                : <h2 className='no-data'>No data to display graf</h2> 
+                        }
+                       
                     </Col>
                 </Row>
                 <Row className="w-100" >
-                    {/* <Col lg="6" sm="6" className='trans-field'>
-                        <div className={transactions.length != 0 ? '' : 'd-none'}>
-                            <DateRangePickerComponent placeholder="Enter Date Range"
-                                startDate={dateRange.startDate}
-                                endDate={dateRange.endDate}
-                                // min={minDate}
-                                // max={maxDate}
-                                minDays={2}
-                                format="dd-MMM-yy"
-                                //Uncomment below code to show month range picker. Also comment the properties min, max, mindays and maxdays
-                                // start="Year"
-                                // depth="Year"
-                            ></DateRangePickerComponent>
+                    <Col lg="6" sm="6" className='trans-field'>
+                        <div className={!noDataMsg && noDataMsg.length == 0 ? '' : 'd-none'}>
+                            <input
+                                value={`FILTER BY DATE ${new Date().toLocaleDateString()}`}
+                                readOnly
+                                className="inputBox"
+                                onClick={ () => setOpen(open => !open) }
+                            />
+                            {open && 
+                            <DateRange
+                                editableDateInputs={true}
+                                moveRangeOnFirstSelection={false}
+                                ranges={range ? range : undefined}
+                                months={1}
+                                direction="horizontal"
+                                onChange={handleDateRangeChange}
+                                className="calendarElement"
+                                maxDate={new Date()} 
+                            />
+                            }
                         </div>
-                    </Col> */}
-                    <Col lg="12" sm="12" className='trans-field'>
+   
+                    </Col>
+                   
+                    <Col lg="6" sm="6" className='pag-col'>
                         <div className={!noDataMsg && noDataMsg.length == 0 ? '' : 'd-none'}>
                             <Pagination className='custom-pagination'>
                                 <Pagination.First 
@@ -290,10 +284,23 @@ function TransactionPage()
                                     );
                                 })
                             )
-                            
-
-                        
                     }
+                </Row>
+                <Row className="pie-charts" >
+                    {
+                        !noDataMsg && noDataMsg.length == 0 ?
+                            <>
+                                <Col lg="6" sm="6" className='acc-name'>
+                                    <ComponentPieChart transactions={transactions} isDeposit={true} title='Share of deposit categories in transactions'/>
+                                </Col>
+                                <Col lg="6" sm="6" className='acc-name'>
+                                    <ComponentPieChart transactions={transactions} isDeposit={false} title='Share of widrawal categories in transactions'/>
+                                </Col>
+                            </>
+                            :
+                            <h2 className='no-data'>No data to display graf</h2> 
+                    }
+
                 </Row>
                 <TransactionModal 
                     transactionModal={transactionModal} 

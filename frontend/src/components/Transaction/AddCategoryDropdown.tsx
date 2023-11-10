@@ -3,11 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Dropdown, Button, Form } from 'react-bootstrap';
 import Category from '../../model/Category/category';
 import PopulatedTransaction from '../../model/Transaction/populatedTransaction';
+import TransactionAccount from '../../model/Transaction/transactionAccount';
 
 // eslint-disable-next-line max-len
 const CategoryDropdown = ({ categories, isDeposit, onCategorySelect, setIsDeposit, currentTrans }:
      // eslint-disable-next-line max-len
-     { categories:Category[], isDeposit?:boolean, onCategorySelect:any, setIsDeposit: React.Dispatch<React.SetStateAction<boolean>> , currentTrans:PopulatedTransaction | null}) => 
+     { categories:Category[], isDeposit?:boolean, onCategorySelect:any, setIsDeposit: React.Dispatch<React.SetStateAction<boolean>> , currentTrans:TransactionAccount | null}) => 
 {
     const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
 

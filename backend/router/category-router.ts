@@ -50,44 +50,45 @@ const categoryRouter = function(express,cat):Router
         }
         catch(e)
         {
-            res.send
-            (
-                ApiResponse({
-                    error: true,
-                    status: 500, 
-                    description:'Error fetching categories'
-                })
-            )
+            throw new Error(e);
         }
         
     })
 
     category.get('',async(req,res)=>
     {
-        const userId = req.query.userId;
-        const allCategories = await  cat.find({userId}).sort({ createdAt: -1 });
-        if (allCategories.length != 0)
+        try
         {
-            res.send
-            (
-                ApiResponse({
-                    error: false,
-                    status: 200, 
-                    resData:allCategories
-                })
-            )
+            const userId = req.query.userId;
+            const allCategories = await  cat.find({userId}).sort({ createdAt: -1 });
+            if (allCategories.length != 0)
+            {
+                res.send
+                (
+                    ApiResponse({
+                        error: false,
+                        status: 200, 
+                        resData:allCategories
+                    })
+                )
+            }
+            else
+            {
+                res.send
+                (
+                    ApiResponse({
+                        error: true,
+                        status: 404, 
+                        description:'No data found'
+                    })
+                )
+            }
         }
-        else
+        catch(e)
         {
-            res.send
-            (
-                ApiResponse({
-                    error: true,
-                    status: 404, 
-                    description:'No data found'
-                })
-            )
+            throw new Error(e);
         }
+        
         
     })
 
@@ -123,82 +124,99 @@ const categoryRouter = function(express,cat):Router
         }
         catch (error)
         {
-            res.status(500).send({error: 'Server error '})
+            throw new Error(error);
         }
     })
 
     category.post('', async(req,res) =>
     {
 
-        const schema = {
-            type: 'object',
-            properties: {
-                name: { 
-                    type:'string',
-                    minLength:4,
-                },
-                isDeposit: { type: 'boolean' },
-                userId: {
-                    type: 'object',
-                    properties: {
-                        userId: {type: 'string', pattern: '^[a-f\\d]{24}$'},
+        try
+        {
+            const schema = {
+                type: 'object',
+                properties: {
+                    name: { 
+                        type:'string',
+                        minLength:4,
                     },
+                    isDeposit: { type: 'boolean' },
+                    userId: {
+                        type: 'object',
+                        properties: {
+                            userId: {type: 'string', pattern: '^[a-f\\d]{24}$'},
+                        },
+                    },
+                  
                 },
-              
-            },
-            required: ['name', 'isDeposit','userId']
-        };
-
-        let filter={};
-        if (req.body._id)
-        {
-            filter = {
-                _id:req.body._id,
+                required: ['name', 'isDeposit','userId']
             };
-        }
-        else
-        {
-            filter = {
-                _id:new BSON.ObjectId(),
-            };
-            
-        }
-        req.body.userId = new BSON.ObjectId(req.body.userId);
-
-        const categories = {
-            name:req.body.name,
-            isDeposit:req.body.isDeposit,
-            userId:req.body.userId
-        };
-        const options = {
-            new: true,
-            upsert: true,
-        };
-
-        const ajv = new Ajv();
-        const validate = ajv.compile(schema);
-        const valid = validate(categories);
-        if (!valid)
-        {
-            const arr = [];
-            for (const [key, value] of Object.entries(validate.errors))
+    
+            let filter={};
+            if (req.body._id)
             {
-                arr.push({var:value.instancePath, message:value.message})
+                filter = {
+                    _id:req.body._id,
+                };
             }
-            res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
+            else
+            {
+                filter = {
+                    _id:new BSON.ObjectId(),
+                };
+                
+            }
+            req.body.userId = new BSON.ObjectId(req.body.userId);
+    
+            const categories = {
+                name:req.body.name,
+                isDeposit:req.body.isDeposit,
+                userId:req.body.userId
+            };
+            const options = {
+                new: true,
+                upsert: true,
+            };
+    
+            const ajv = new Ajv();
+            const validate = ajv.compile(schema);
+            const valid = validate(categories);
+            if (!valid)
+            {
+                const arr = [];
+                for (const [key, value] of Object.entries(validate.errors))
+                {
+                    arr.push({var:value.instancePath, message:value.message})
+                }
+                res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
+            }
+            else
+            {
+                const catList = await cat.updateOne(filter,{$set:categories},options);
+                res.send(ApiResponse({ error: false, status: 200, resData: catList }));
+            }
         }
-        else
+        catch(e)
         {
-            const catList = await cat.updateOne(filter,{$set:categories},options);
-            res.send(ApiResponse({ error: false, status: 200, resData: catList }));
+            throw new Error(e);
         }
+       
 
     });
 
     category.delete('/:id', async(req, res) =>
     {
-        const removedList = await cat.findOneAndRemove({_id:req.params.id})
-        res.send(ApiResponse({ error: false, status: 200, resData: removedList }));
+        try
+        {
+            const removedList = await cat.findOneAndRemove({_id:req.params.id})
+            res.send(ApiResponse({ error: false, status: 200, resData: removedList }));
+        
+        }
+        catch(e)
+        {
+            throw new Error(e);
+        }
+        
     });
 
 

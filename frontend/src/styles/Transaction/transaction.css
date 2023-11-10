@@ -45,6 +45,15 @@
   margin-top: 70px !important;
 }
 
+.pie-charts {
+  width: 100%;
+  margin-top: 70px !important;
+}
+
+.acc-name div {
+  width: 90% !important;
+}
+
 .acc-name {
   display: flex !important;
   justify-content: right !important;
@@ -55,10 +64,25 @@
   color: white !important;
 }
 
+.inputBox {
+  background-color: #024916;
+  color: white;
+  border: 1px solid white;
+  text-align: center;
+  padding: 10px;
+  border-radius: 5%;
+  font-size: 18px;
+}
+
 .trans-field {
   color: white;
   text-align: center;
   font-size: 20px;
+}
+
+.pag-col {
+  display: flex !important;
+  align-items: end !important;
 }
 
 .pagination-page {
@@ -79,6 +103,12 @@
   background-color: #024916 !important;
 }
 
+.col-line-graph {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
 .acc-total-amount {
   display: flex !important;
   justify-content: left !important;
@@ -90,8 +120,14 @@
   color: white !important;
 }
 
+.line-graph {
+  width: 100% !important;
+  margin-top: 50px !important;
+  margin-bottom: 100px !important;
+}
+
 .transactions {
-  margin-top: 100px !important;
+  margin-top: 50px !important;
   width: 100% !important;
 }
 

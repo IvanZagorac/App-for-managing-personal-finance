@@ -41,14 +41,7 @@ const accountRouter = function(express,acc):Router
         }
         catch(e)
         {
-            res.send
-            (
-                ApiResponse({
-                    error: true,
-                    status: 500, 
-                    description:'Error fetching accounts'
-                })
-            )
+            throw new Error(e);
         }
        
     })
@@ -72,14 +65,7 @@ const accountRouter = function(express,acc):Router
         }
         catch(e)
         {
-            res.send
-            (
-                ApiResponse({
-                    error: true,
-                    status: 500, 
-                    description:'Error patching accounts'
-                })
-            )
+            throw new Error(e);
         }
        
     })
@@ -109,7 +95,7 @@ const accountRouter = function(express,acc):Router
         }
         catch (error)
         {
-            res.send(ApiResponse({error: true, description: 'Server error founding account', status: 500}));
+            throw new Error(error);
         }
        
     })
@@ -187,14 +173,7 @@ const accountRouter = function(express,acc):Router
         }
         catch(e)
         {
-            res.send
-            (
-                ApiResponse({
-                    error: true,
-                    status: 500, 
-                    description:'Error fetching accounts'
-                })
-            )
+            throw new Error(e);
         }
         
 
@@ -202,8 +181,16 @@ const accountRouter = function(express,acc):Router
 
     account.delete('/:id', async (req, res) =>
     {
-        const removedList = await  acc.findOneAndRemove({_id:req.params.id});
-        res.send(ApiResponse({error: false, status:200,resData:removedList}));
+        try
+        {
+            const removedList = await  acc.findOneAndRemove({_id:req.params.id});
+            res.send(ApiResponse({error: false, status:200,resData:removedList}));
+        }
+        catch(e)
+        {
+            throw new Error(e);
+        }
+       
         
     });
 

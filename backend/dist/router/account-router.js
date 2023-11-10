@@ -37,11 +37,7 @@ const accountRouter = function (express, acc) {
             }
         }
         catch (e) {
-            res.send((0, ApiResponse_1.default)({
-                error: true,
-                status: 500,
-                description: 'Error fetching accounts'
-            }));
+            throw new Error(e);
         }
     }));
     account.patch('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -55,11 +51,7 @@ const accountRouter = function (express, acc) {
             }));
         }
         catch (e) {
-            res.send((0, ApiResponse_1.default)({
-                error: true,
-                status: 500,
-                description: 'Error patching accounts'
-            }));
+            throw new Error(e);
         }
     }));
     account.get('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -78,7 +70,7 @@ const accountRouter = function (express, acc) {
             }
         }
         catch (error) {
-            res.send((0, ApiResponse_1.default)({ error: true, description: 'Server error founding account', status: 500 }));
+            throw new Error(error);
         }
     }));
     account.post('', (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -139,16 +131,17 @@ const accountRouter = function (express, acc) {
             }
         }
         catch (e) {
-            res.send((0, ApiResponse_1.default)({
-                error: true,
-                status: 500,
-                description: 'Error fetching accounts'
-            }));
+            throw new Error(e);
         }
     }));
     account.delete('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const removedList = yield acc.findOneAndRemove({ _id: req.params.id });
-        res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
+        try {
+            const removedList = yield acc.findOneAndRemove({ _id: req.params.id });
+            res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
+        }
+        catch (e) {
+            throw new Error(e);
+        }
     }));
     return account;
 };

@@ -46,29 +46,30 @@ const categoryRouter = function (express, cat) {
             }
         }
         catch (e) {
-            res.send((0, ApiResponse_1.default)({
-                error: true,
-                status: 500,
-                description: 'Error fetching categories'
-            }));
+            throw new Error(e);
         }
     }));
     category.get('', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const userId = req.query.userId;
-        const allCategories = yield cat.find({ userId }).sort({ createdAt: -1 });
-        if (allCategories.length != 0) {
-            res.send((0, ApiResponse_1.default)({
-                error: false,
-                status: 200,
-                resData: allCategories
-            }));
+        try {
+            const userId = req.query.userId;
+            const allCategories = yield cat.find({ userId }).sort({ createdAt: -1 });
+            if (allCategories.length != 0) {
+                res.send((0, ApiResponse_1.default)({
+                    error: false,
+                    status: 200,
+                    resData: allCategories
+                }));
+            }
+            else {
+                res.send((0, ApiResponse_1.default)({
+                    error: true,
+                    status: 404,
+                    description: 'No data found'
+                }));
+            }
         }
-        else {
-            res.send((0, ApiResponse_1.default)({
-                error: true,
-                status: 404,
-                description: 'No data found'
-            }));
+        catch (e) {
+            throw new Error(e);
         }
     }));
     category.get('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -91,66 +92,76 @@ const categoryRouter = function (express, cat) {
             }
         }
         catch (error) {
-            res.status(500).send({ error: 'Server error ' });
+            throw new Error(error);
         }
     }));
     category.post('', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const schema = {
-            type: 'object',
-            properties: {
-                name: {
-                    type: 'string',
-                    minLength: 4,
-                },
-                isDeposit: { type: 'boolean' },
-                userId: {
-                    type: 'object',
-                    properties: {
-                        userId: { type: 'string', pattern: '^[a-f\\d]{24}$' },
+        try {
+            const schema = {
+                type: 'object',
+                properties: {
+                    name: {
+                        type: 'string',
+                        minLength: 4,
+                    },
+                    isDeposit: { type: 'boolean' },
+                    userId: {
+                        type: 'object',
+                        properties: {
+                            userId: { type: 'string', pattern: '^[a-f\\d]{24}$' },
+                        },
                     },
                 },
-            },
-            required: ['name', 'isDeposit', 'userId']
-        };
-        let filter = {};
-        if (req.body._id) {
-            filter = {
-                _id: req.body._id,
+                required: ['name', 'isDeposit', 'userId']
             };
-        }
-        else {
-            filter = {
-                _id: new mongodb_1.BSON.ObjectId(),
-            };
-        }
-        req.body.userId = new mongodb_1.BSON.ObjectId(req.body.userId);
-        const categories = {
-            name: req.body.name,
-            isDeposit: req.body.isDeposit,
-            userId: req.body.userId
-        };
-        const options = {
-            new: true,
-            upsert: true,
-        };
-        const ajv = new ajv_1.default();
-        const validate = ajv.compile(schema);
-        const valid = validate(categories);
-        if (!valid) {
-            const arr = [];
-            for (const [key, value] of Object.entries(validate.errors)) {
-                arr.push({ var: value.instancePath, message: value.message });
+            let filter = {};
+            if (req.body._id) {
+                filter = {
+                    _id: req.body._id,
+                };
             }
-            res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
+            else {
+                filter = {
+                    _id: new mongodb_1.BSON.ObjectId(),
+                };
+            }
+            req.body.userId = new mongodb_1.BSON.ObjectId(req.body.userId);
+            const categories = {
+                name: req.body.name,
+                isDeposit: req.body.isDeposit,
+                userId: req.body.userId
+            };
+            const options = {
+                new: true,
+                upsert: true,
+            };
+            const ajv = new ajv_1.default();
+            const validate = ajv.compile(schema);
+            const valid = validate(categories);
+            if (!valid) {
+                const arr = [];
+                for (const [key, value] of Object.entries(validate.errors)) {
+                    arr.push({ var: value.instancePath, message: value.message });
+                }
+                res.send((0, ApiResponse_1.default)({ error: true, ajvMessage: arr, status: 500 }));
+            }
+            else {
+                const catList = yield cat.updateOne(filter, { $set: categories }, options);
+                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: catList }));
+            }
         }
-        else {
-            const catList = yield cat.updateOne(filter, { $set: categories }, options);
-            res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: catList }));
+        catch (e) {
+            throw new Error(e);
         }
     }));
     category.delete('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
-        const removedList = yield cat.findOneAndRemove({ _id: req.params.id });
-        res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
+        try {
+            const removedList = yield cat.findOneAndRemove({ _id: req.params.id });
+            res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
+        }
+        catch (e) {
+            throw new Error(e);
+        }
     }));
     return category;
 };

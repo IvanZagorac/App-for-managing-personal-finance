@@ -10,14 +10,15 @@ import ajvMess from '../../model/Auth/ajv';
 import PopulatedTransaction from '../../model/Transaction/populatedTransaction';
 import AccountById from '../../model/Account/accountById';
 import { togetherFunction } from '../../config/token';
+import TransactionAccount from '../../model/Transaction/transactionAccount';
 
 function TransactionModal({ transactionModal, setTransactionModal, currTransaction, isEdit,setCurrTransaction, fetchAllTransactions,currTransPrize,account,setAccount}: 
     { 
         transactionModal:any,
          setTransactionModal:any, 
-         currTransaction:PopulatedTransaction | null, 
+         currTransaction:TransactionAccount | null, 
          isEdit:boolean,
-        setCurrTransaction:React.Dispatch<React.SetStateAction<PopulatedTransaction | null>> 
+        setCurrTransaction:React.Dispatch<React.SetStateAction<TransactionAccount | null>> 
         fetchAllTransactions:any,
         currTransPrize:number,
         account:AccountById,
@@ -116,7 +117,12 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
                     setTransactionModal(false);
                     setCurrTransaction({ ...currTransaction,
                         _id:'',
-                        accountId: '',
+                        accountId: {
+                            _id:'',
+                            userId:'',
+                            name:'',
+                            totalAmount:0,
+                        },
                         categoryId: {
                             _id:'',
                             name:'',

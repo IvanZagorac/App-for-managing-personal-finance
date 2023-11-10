@@ -1,14 +1,16 @@
-import { useState } from 'react'
+import {  useState } from 'react'
 import { Alert, Button, Col, Form, Modal } from 'react-bootstrap'
 import axios from 'axios';
 import { config } from '../../config/config';
 import AddCategory from '../../model/Category/addCategory';
 import ajvMess from '../../model/Auth/ajv';
+import { togetherFunction } from '../../config/token';
 
 function CategoryModal({ categoryModal, setCategoryModal }:any)
 {
 
     const[errorMessage,setErrorMessage] =useState<ajvMess[]>([]);
+    const token = togetherFunction();
     const[category,setCategory]=useState<AddCategory>({
         name:'',
         isDeposit: false,
@@ -22,7 +24,7 @@ function CategoryModal({ categoryModal, setCategoryModal }:any)
             const response = await axios.post(config.pool + 'category', {
                 name:category.name,
                 isDeposit:category.isDeposit,
-                userId:category.userId,
+                userId:token.value?._id,
             });
             if (response.data.error)
             {
@@ -56,7 +58,6 @@ function CategoryModal({ categoryModal, setCategoryModal }:any)
             [id]: value
         }));
     };
-
     return(
         <Modal
             centered
