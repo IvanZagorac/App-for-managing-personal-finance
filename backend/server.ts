@@ -17,7 +17,7 @@ import authRouter from './router/auth-router';
 import accountRouter from './router/account-router';
 import  transactionRouter from './router/transaction-router';
 import categoryRouter from './router/category-router';
-const mongooseUrl = process.env.MONGO_URI || config.pool;
+const mongooseUrl = process.env.MONGO_URI;
 
 
 const init = () =>
@@ -55,7 +55,7 @@ const initServer = () =>
 
     app.use(bodyParser.urlencoded({extended: true}));
     app.use(bodyParser.json());
-    app.use(express.static(__dirname + '/public'));
+    app.use(express.static(path.join(__dirname + './frontend/build')));
 
     app.use(function (req, res, next)
     {
@@ -72,9 +72,10 @@ const initServer = () =>
     app.use('/transaction', transactionRouter(express, transaction));
     app.use('/category', categoryRouter(express, category));
 
+    app.use(express.static)
     app.get('*', function (req, res)
     {
-        res.sendFile(path.join(__dirname + '/public/index.html'));
+        res.sendFile(path.join(__dirname + './frontend/build.index.html'));
     });
 
     app.listen(config.port);
