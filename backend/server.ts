@@ -71,12 +71,6 @@ const initServer = () =>
     app.use('/account', accountRouter(express, account));
     app.use('/transaction', transactionRouter(express, transaction));
     app.use('/category', categoryRouter(express, category));
-
-    app.get('*', function (req, res)
-    {
-        res.sendFile(path.join(__dirname + './frontend/build.index.html'));
-    });
-
     app.listen(config.port);
 
     console.log('Running on port ' + config.port);
