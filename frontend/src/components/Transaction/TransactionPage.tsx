@@ -173,7 +173,7 @@ function TransactionPage()
                     </Col>
                 </Row>
                 <Row className="w-100" >
-                    <Col lg="6" sm="6" className='trans-field'>
+                    <Col lg="6" sm="12" className='trans-field'>
                         <>
                             <DatePicker 
                                 maxDate={endDate ? endDate : new Date()} value={ startDate ? startDate.toLocaleDateString() : 'Start date'} 
@@ -190,7 +190,7 @@ function TransactionPage()
    
                     </Col>
                    
-                    <Col lg="6" sm="6" className='pag-col'>
+                    <Col lg="6" sm="12" className='pag-col'>
                         <div className={!noDataMsg && noDataMsg.length == 0 ? '' : 'd-none'}>
                             <Pagination className='custom-pagination'>
                                 <Pagination.First 
@@ -241,7 +241,7 @@ function TransactionPage()
                                                 <Col lg="3" sm="3" className='trans-field'>
                                                     <p>{moment(trans.time).format('MMMM D, YYYY h:mm A')}</p>
                                                 </Col>
-                                                <Col lg="1" sm="1" className='trans-field'>
+                                                <Col lg="1" sm="2" className='trans-field'>
                                                     <p>{trans.categoryId.name}</p>
                                                 </Col>
                                                 <Col lg="3" sm="3" className='trans-field'>
@@ -256,7 +256,7 @@ function TransactionPage()
                                                             <p className='trans-prize-not'>{`-${trans.transactionPrize} EUR`}</p>
                                                     }
                                                 </Col>
-                                                <Col lg="3" sm="3" className='trans-field'>
+                                                <Col lg="3" sm="2" className='trans-field'>
                                                     <Button className='card-header-btn' variant='danger' onClick={()=>deleteTransaction(trans)}>Remove</Button>
                                                     <Button onClick={()=> handleModal(setTransactionModal,true,trans)} className='edit-trans-btn' variant='primary'>Edit Transaction</Button>
                                                 </Col>

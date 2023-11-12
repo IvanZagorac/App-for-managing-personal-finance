@@ -115,11 +115,11 @@ function AccountPage()
             
             <MainMenu decodedToken={token}/>
             <Container className="cont">
-                <Row className="w-100">
-                    <Col lg="6" sm="6" className='first-col'>
+                <Row className="acc-row">
+                    <Col lg="6" sm="5" md ="6" className='first-col'>
                         <h2 className='acc-header'>Accounts</h2>
                     </Col>
-                    <Col lg="6" sm="6" className='second-col'>
+                    <Col lg="6" sm="7" md="6" className='second-col'>
                         {
                             // eslint-disable-next-line max-len
                             <Button onClick={()=> setAccountModal(true)} className='acc-add-btn' variant='primary'>Add new account</Button>
@@ -143,15 +143,15 @@ function AccountPage()
                                                 <Card className='acc-card'>
                                                     <Link to={`/account/${acc._id}`} className='acc-link'>
                                                         <Card.Header className='acc-card-header'>
-                                                            <div className='acc-values'>
+                                                            <Col lg="6" sm="12" md ="6">
                                                                 <p>{acc.name}</p>
-                                                            </div>
-                                                            <div className='btn-div'>
+                                                            </Col>
+                                                            <Col lg="6" sm="12" md ="6">
                                                                 {
                                                                 // eslint-disable-next-line max-len
                                                                     <Button className='card-header-btn' variant='danger' onClick={(event)=>handleRemove(event, acc._id)}>Remove</Button>
                                                                 }
-                                                            </div>
+                                                            </Col>
                                                
                                                         </Card.Header>
                                             

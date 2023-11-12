@@ -4,6 +4,10 @@
   margin-right: 0px !important;
 }
 
+.acc-row {
+  width: 100%;
+}
+
 .acc-header {
   font-size: 32px;
   color: white;

@@ -55,9 +55,6 @@ const initServer = () => {
     app.use('/account', (0, account_router_1.default)(express_1.default, account_1.default));
     app.use('/transaction', (0, transaction_router_1.default)(express_1.default, transaction_1.default));
     app.use('/category', (0, category_router_1.default)(express_1.default, category_1.default));
-    app.get('*', function (req, res) {
-        res.sendFile(path_1.default.join(__dirname + './frontend/build.index.html'));
-    });
     app.listen(config_1.config.port);
     console.log('Running on port ' + config_1.config.port);
 };

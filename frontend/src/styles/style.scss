@@ -34,5 +34,75 @@ body{
       padding: 5px;
     }
   }
+
+  .accBtn{
+    margin-top: 10px!important;
+  }
+
+  .acc-row{
+    display: block!important;
+  }
+
+  .first-col{
+    display: block!important;
+    margin-left: 20px;
+    h2{
+      font-size: 24px!important;
+
+    }
+  }
+  .second-col{
+    button{
+      font-size: 16px!important;
+    }
+  }
+  .acc-card{
+    margin-left: 20px!important;
+    font-size: 22px;
+  }
+
+  .acc-card-header{
+      font-size: 22px!important;
+      display: flex!important;
+      justify-content: center;
+      align-items: center;
+  }
+
+  .card-header-btn{
+    display: flex!important;
+    padding: 5px!important;
+  }
+  .pag-col{
+    margin-top: 20px!important;
+    display: flex!important;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .acc-name{
+    justify-content: center!important;
+  }
+  .acc-total-amount{
+    justify-content: center!important;
+  }
+
+  .trans-field{
+    font-size: 16px!important;
+  }
+  .trans-prize{
+    font-size: 16px!important;
+  }
+
+  .navbar-nav{
+   display: flex!important;
+   align-items: center;
+   justify-content: center!important;
+  }
+
+  .edit-trans-btn{
+    padding: 5px!important;
+    font-size: 14px!important;
+  }
+
 }
 

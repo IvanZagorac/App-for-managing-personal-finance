@@ -74,7 +74,7 @@ const transactionRouter = function (express, trans) {
         const transactionId = req.params.id;
         try {
             const foundTransaction = yield trans.findOne({ _id: transactionId })
-                .populate('categories');
+                .populate('categoryId');
             if (foundTransaction) {
                 res.send((0, ApiResponse_1.default)({
                     error: false,
