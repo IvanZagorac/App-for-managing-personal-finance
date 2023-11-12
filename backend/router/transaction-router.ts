@@ -94,7 +94,7 @@ const transactionRouter = function(express,trans):Router
         try
         {
             const foundTransaction = await trans.findOne({_id: transactionId})
-                .populate('categories');
+                .populate('categoryId');
 
             if (foundTransaction)
             {
