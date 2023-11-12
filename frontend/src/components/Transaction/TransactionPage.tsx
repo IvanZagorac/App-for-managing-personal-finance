@@ -175,8 +175,17 @@ function TransactionPage()
                 <Row className="w-100" >
                     <Col lg="6" sm="6" className='trans-field'>
                         <>
-                            <DatePicker maxDate={endDate ? endDate : new Date()} value={ startDate ? startDate.toLocaleDateString() : 'Start date'} className='date-picker' selected={startDate} onChange={(date) => setStartDate(date)}/>
-                            <DatePicker maxDate={new Date()} value={ endDate ? endDate.toLocaleDateString() : 'End date'} className='date-picker'selected={endDate} onChange={(date) => setEndDate(date)} />
+                            <DatePicker 
+                                maxDate={endDate ? endDate : new Date()} value={ startDate ? startDate.toLocaleDateString() : 'Start date'} 
+                                className='date-picker' 
+                                selected={startDate} 
+                                onChange={(date) => setStartDate(date)}/>
+                            <DatePicker 
+                                maxDate={new Date()} 
+                                value={ endDate ? endDate.toLocaleDateString() : 'End date'}
+                                className='date-picker'
+                                selected={endDate} 
+                                onChange={(date) => setEndDate(date)} />
                         </>
    
                     </Col>

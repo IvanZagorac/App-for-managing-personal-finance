@@ -17,7 +17,7 @@ import authRouter from './router/auth-router';
 import accountRouter from './router/account-router';
 import  transactionRouter from './router/transaction-router';
 import categoryRouter from './router/category-router';
-const mongooseUrl = process.env.MONGO_URI;
+const mongooseUrl = process.env.MONGO_URI || config.pool;
 
 
 const init = () =>
@@ -72,7 +72,6 @@ const initServer = () =>
     app.use('/transaction', transactionRouter(express, transaction));
     app.use('/category', categoryRouter(express, category));
 
-    app.use(express.static)
     app.get('*', function (req, res)
     {
         res.sendFile(path.join(__dirname + './frontend/build.index.html'));
