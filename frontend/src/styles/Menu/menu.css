@@ -37,6 +37,10 @@
   font-size: 20px !important;
 }
 
+.navbar-toggler-icon {
+  border-color: white;
+}
+
 @media only screen and (max-width: 992px) {
   .nav-item {
     display: block;

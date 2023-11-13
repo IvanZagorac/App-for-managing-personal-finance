@@ -237,7 +237,7 @@ function TransactionPage()
                                 {
                                     return (
                                         <>
-                                            <div style={{borderBottom:'1px solid white ', display:'flex',marginBottom:'30px'}}>
+                                            <div className='trans-div' >
                                                 <Col lg="3" sm="3" className='trans-field'>
                                                     <p>{moment(trans.time).format('MMMM D, YYYY h:mm A')}</p>
                                                 </Col>
@@ -257,7 +257,7 @@ function TransactionPage()
                                                     }
                                                 </Col>
                                                 <Col lg="3" sm="2" className='trans-field'>
-                                                    <Button className='card-header-btn' variant='danger' onClick={()=>deleteTransaction(trans)}>Remove</Button>
+                                                    <Button className='remove-trans-btn' variant='danger' onClick={()=>deleteTransaction(trans)}>Remove</Button>
                                                     <Button onClick={()=> handleModal(setTransactionModal,true,trans)} className='edit-trans-btn' variant='primary'>Edit Transaction</Button>
                                                 </Col>
                                             </div>

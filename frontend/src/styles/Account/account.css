@@ -13,12 +13,12 @@
   color: white;
 }
 
-.first-col {
+.first-col-acc {
   margin-top: 60px !important;
   display: flex !important;
 }
 
-.second-col {
+.second-col-acc {
   margin-top: 60px !important;
   padding-right: 0px !important;
   text-align: right;
@@ -64,13 +64,22 @@
   top: 10%;
 }
 
-.card-header-btn {
-  padding: 5px 15px !important;
-}
-
 .accBtn {
   margin-bottom: 20px !important;
   padding: 5px 30px !important;
   background-color: #024916 !important;
   color: white !important;
+}
+
+.card-header-btn {
+  position: absolute;
+  padding: 5px 15px !important;
+  top: 12%;
+  right: 5%;
+}
+
+@media screen and (max-width: 950px) and (min-width: 601px) {
+  .acc-card {
+    width: 100% !important;
+  }
 }/*# sourceMappingURL=account.css.map */

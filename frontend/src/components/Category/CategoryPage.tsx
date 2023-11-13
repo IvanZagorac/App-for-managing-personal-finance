@@ -187,7 +187,7 @@ function CategoryPage()
            
             <Container className="cont">
                 <Row className="header-cat">
-                    <Col lg="4" sm="4" className='first-col'>
+                    <Col lg="4" sm="4" className='first-col-cat'>
                         <h2 className='acc-header'>Categories</h2>
                         <Form.Check
                             type="checkbox"
@@ -199,14 +199,14 @@ function CategoryPage()
                         />
                     </Col>
                     
-                    <Col lg="8" sm="8" className='second-col'>
+                    <Col lg="8" sm="8" className='second-col-cat'>
                         <Button onClick={()=> handleModal(setCategoryModal,false,null)} className='add-cat-btn' variant='primary'>Add Category</Button>
                     </Col>
                 </Row>
                 <Row className="w-100">
-                    <Col lg="12" sm="12" className='trans-field'>
+                    <Col lg="12" sm="12" className='cat-field'>
                         <div className={!noDataMsg && noDataMsg.length == 0 ? '' : 'd-none'}>
-                            <Pagination className='custom-pagination'>
+                            <Pagination className='custom-pagination-cat'>
                                 <Pagination.First 
                                     onClick={() => handlePageChange(1)}  
                                     disabled={currentPage === 1} />
@@ -236,43 +236,49 @@ function CategoryPage()
                             </Pagination>
                         </div>
                     </Col>
-                    {
-                        
-                        noDataMsg && noDataMsg.length != 0 ?
-                            (
-                                <>
-                                    <h2 className='no-data'>NO DATA</h2>
-                                </>
-                            )
-                            :
-                            (
-                                allCategories.map((cat) => 
-                                {
-                                    if (token.value && cat.userId === token.value._id ) 
-                                    {
-                                        return (
-                                            <>
-                                                <div style={{borderBottom:'1px solid white ', display:'flex',marginBottom:'30px'}}>
-                                                    <Col lg="6" sm="6" className='trans-field'>
-                                                        <p>{cat.name}</p>
-                                                    </Col>
-                                                    <Col lg="6" sm="6" className='trans-field'>
-                                                        {
-                                                        // <Button className='card-header-btn' variant='danger' onClick={()=>deleteCategory(cat._id)}>Remove</Button>
-                                                        }
-                                                        <Button onClick={()=> handleModal(setCategoryModal,true,cat)} className='acc-add-btn' variant='primary'>Edit Category</Button>
-                                                    </Col>
-                                                </div>
-                                  
-                                            </>
-                                        );
-                                    }
-                                })
-                            )
-                            
-                    }
-                    
                 </Row>
+                <Row>
+                    <div className='cat-row'>
+                        {
+                        
+                            noDataMsg && noDataMsg.length != 0 ?
+                                (
+                                    <>
+                                        <h2 className='no-data'>NO DATA</h2>
+                                    </>
+                                )
+                                :
+                                (
+                                    allCategories.map((cat) => 
+                                    {
+                                        if (token.value && cat.userId === token.value._id ) 
+                                        {
+                                            return (
+                                                <>
+                                                    <div style={{borderBottom:'1px solid white ', display:'flex',marginBottom:'30px'}}>
+                                                        <Col lg="6" sm="6" className='cat-field'>
+                                                            <p>{cat.name}</p>
+                                                        </Col>
+                                                        <Col lg="6" sm="6" className='cat-field'>
+                                                            {
+                                                                // <Button className='card-header-btn' variant='danger' onClick={()=>deleteCategory(cat._id)}>Remove</Button>
+                                                            }
+                                                            <Button onClick={()=> handleModal(setCategoryModal,true,cat)} className='edit-cat-btn' variant='primary'>Edit Category</Button>
+                                                        </Col>
+                                                    </div>
+                                  
+                                                </>
+                                            );
+                                        }
+                                    })
+                                )
+                            
+                        }
+                    </div>
+                </Row>
+                    
+                    
+                
             </Container>
             <Modal
                 centered

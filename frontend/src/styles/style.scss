@@ -39,19 +39,43 @@ body{
     margin-top: 10px!important;
   }
 
-  .acc-row{
-    display: block!important;
-  }
-
   .first-col{
-    display: block!important;
-    margin-left: 20px;
+    display: flex!important;
+    justify-content: center;
+    align-items: top;
+    width: 50%!important;
     h2{
       font-size: 24px!important;
 
     }
   }
   .second-col{
+    display: block!important;
+    width: 45%!important;
+      align-items: center;
+    button{
+      margin-right: 0px!important;
+      margin-top: 10px;
+      font-size: 13px!important;
+    }
+  }
+
+  .cat-edit-btn{
+    font-size: 20px;
+}
+  .first-col-acc{
+    display: flex!important;
+    width: 50%!important;
+    justify-content: center;
+    align-items: center;
+    h2{
+      font-size: 24px!important;
+
+    }
+  }
+  .second-col-acc{
+      align-items: center;
+      width: 50%!important;
     button{
       font-size: 16px!important;
     }
@@ -87,10 +111,15 @@ body{
   }
 
   .trans-field{
-    font-size: 16px!important;
+    width: 100%;
+    font-size: 13px!important;
+    button{
+      font-size: 13px;
+    }
   }
   .trans-prize{
-    font-size: 16px!important;
+    width: 100%;
+    font-size: 13px!important;
   }
 
   .navbar-nav{
@@ -103,6 +132,65 @@ body{
     padding: 5px!important;
     font-size: 14px!important;
   }
+  .acc-card{
+    width: 100%!important;
+    margin-left: 10px!important;
+  }
+
+  .nav-link{
+    font-size: 22px!important;
+  }
+
+  .nav-text{
+    display: flex!important;
+    justify-content: center;
+    align-items: center;
+  }
+  .nav-link{
+    margin-right: 0px!important;
+    margin-bottom: 10px!important;
+  }
+
+  .first-col-cat{
+    display: block!important;
+    h2{
+      font-size: 24px;
+    }
+  }
+
+  .second-col-cat{
+    margin-bottom: 50px!important;
+    margin-top: 0px!important;
+    position: absolute!important;
+    top: 8%;
+  }
+
+  .custom-checkbox-cat{
+    display: block!important;
+    margin-left: 0px!important;
+    margin-top: 40px!important;
+  }
+  .cat-row{
+    div{
+      display: flex!important;
+      justify-content:space-around;
+      align-items: center;
+    }
+   
+  }
+
+  .custom-pagination-cat{
+    display: flex!important;
+    justify-content: center;
+    align-items: center;
+    margin-bottom:70px!important;
+  }
+
+  .trans-div{
+    padding-right: 0px!important;
+    padding-left: 0px!important;
+  }
+    
 
 }
 

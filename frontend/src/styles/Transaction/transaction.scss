@@ -118,6 +118,26 @@ $whiteColor: white;
         color: white!important;
     }
 }
+.first-col{
+    margin-top: 60px!important;
+    display: flex!important;
+}
+
+.remove-trans-btn{
+    padding: 5px 15px!important;
+}
+
+.trans-div{
+    border-bottom:1px solid white;
+    display:flex;
+    margin-bottom:30px;
+}
+
+.second-col{
+    margin-top: 60px!important;
+    padding-right: 0px!important;
+    text-align: right;
+}
 
 .line-graph{
     width: 100%!important;

@@ -34,6 +34,10 @@ $whiteColor: white;
       padding: 5px 15px!important;
       font-size: 20px!important;
   }
+
+  .navbar-toggler-icon{
+    border-color: white;
+  }
   
   @media only screen and (max-width: 992px) {
     .nav-item{

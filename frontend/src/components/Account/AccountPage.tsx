@@ -116,15 +116,18 @@ function AccountPage()
             <MainMenu decodedToken={token}/>
             <Container className="cont">
                 <Row className="acc-row">
-                    <Col lg="6" sm="5" md ="6" className='first-col'>
+                    <Col lg="6" sm="5" md ="6" className='first-col-acc'>
                         <h2 className='acc-header'>Accounts</h2>
                     </Col>
-                    <Col lg="6" sm="7" md="6" className='second-col'>
+                    <Col lg="6" sm="7" md="6" className='second-col-acc'>
                         {
                             // eslint-disable-next-line max-len
                             <Button onClick={()=> setAccountModal(true)} className='acc-add-btn' variant='primary'>Add new account</Button>
                         }   
                     </Col>
+                    
+                </Row>
+                <Row className="acc-row">
                     {
                         noDataMsg && noDataMsg.length != 0 ?
                             (
@@ -143,17 +146,17 @@ function AccountPage()
                                                 <Card className='acc-card'>
                                                     <Link to={`/account/${acc._id}`} className='acc-link'>
                                                         <Card.Header className='acc-card-header'>
-                                                            <Col lg="6" sm="12" md ="6">
+                                                            <div className='acc-col-st' >
                                                                 <p>{acc.name}</p>
-                                                            </Col>
-                                                            <Col lg="6" sm="12" md ="6">
-                                                                {
-                                                                // eslint-disable-next-line max-len
-                                                                    <Button className='card-header-btn' variant='danger' onClick={(event)=>handleRemove(event, acc._id)}>Remove</Button>
-                                                                }
-                                                            </Col>
+                                                            </div>
                                                
                                                         </Card.Header>
+                                                        <div className='acc-col-sec'>
+                                                            {
+                                                            // eslint-disable-next-line max-len
+                                                                <Button className='card-header-btn' variant='danger' onClick={(event)=>handleRemove(event, acc._id)}>Remove</Button>
+                                                            }
+                                                        </div>
                                             
                                                         <Card.Body className='acc-card-header'>
                                                             <p className='acc-values'> {`${acc.totalAmount} EUR`}</p>
@@ -166,8 +169,6 @@ function AccountPage()
                                     }
                                 })
                             )
-                        
-                        
                     }
                 </Row>
             </Container>
