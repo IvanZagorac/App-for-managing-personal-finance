@@ -7,12 +7,16 @@ import { config } from '../../config/config';
 import axios from 'axios';
 import { togetherFunction } from '../../config/token';
 import ajvMess from '../../model/Auth/ajv';
+import DeleteModal from '../DeleteModal';
 
 function AccountPage()
 {
 
     const[allAccounts,setAllAccounts] = useState<Account[]>([])
     const[accountModal,setAccountModal] = useState<boolean>(false);
+    const[deleteModal,setDeleteModal] = useState<boolean>(false);
+    const[removeCurrAcc,setRemoveCurrAcc]= useState<Account | null>(null);
+    const[deleteErrorMessage,setDeleteErrorMessage] = useState<string>('');
     const[noDataMsg,setNoDataMsg] = useState<string>('');
     const[errorMessage,setErrorMessage] =useState<ajvMess[]>([]);
     const[account,setAccount] = useState<Account>({
@@ -36,7 +40,7 @@ function AccountPage()
             const response = await axios.post(config.pool + 'account', {
                 userId,
                 name:account.name,
-                totalAmount:account.totalAmount,
+                totalAmount: account.totalAmount,
             });
             
             if (response.data.error)
@@ -89,14 +93,16 @@ function AccountPage()
     const deleteAccount = async(id:string)=>
     {
         await axios.delete(config.pool+'account/'+id);
+        setDeleteModal(false);
         getAllAccounts();
     }
 
-    const handleRemove = async(event:any,accId:string) =>
+    const handleRemove = async(event:any,acc:Account) =>
     {
         event.preventDefault();
 
-        await deleteAccount(accId);
+        setDeleteModal(true);
+        setRemoveCurrAcc(acc);
     }
 
     useEffect(()=>
@@ -154,7 +160,7 @@ function AccountPage()
                                                         <div className='acc-col-sec'>
                                                             {
                                                             // eslint-disable-next-line max-len
-                                                                <Button className='card-header-btn' variant='danger' onClick={(event)=>handleRemove(event, acc._id)}>Remove</Button>
+                                                                <Button className='card-header-btn' variant='danger' onClick={(event)=>handleRemove(event, acc)}>Remove</Button>
                                                             }
                                                         </div>
                                             
@@ -172,6 +178,20 @@ function AccountPage()
                     }
                 </Row>
             </Container>
+            {
+                removeCurrAcc 
+                    ?
+                    <DeleteModal 
+                        deleteModal={deleteModal}
+                        setDeleteModal={setDeleteModal}
+                        deleteErrorMessage={deleteErrorMessage}
+                        setDeleteErrorMessage={setDeleteErrorMessage}
+                        title={`Are you sure want delete account ${removeCurrAcc!.name}?`}
+                        deleteMethod={() => deleteAccount(removeCurrAcc!._id)}
+                    />
+                    :
+                    <></>
+            }
             <Modal
                 centered
                 show={accountModal}

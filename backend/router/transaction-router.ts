@@ -155,7 +155,7 @@ const transactionRouter = function(express,trans):Router
             };
     
             req.body.accountId = new BSON.ObjectId(req.body.accountId);
-            req.body.transactionPrize = parseFloat(req.body.transactionPrize.toFixed(4));
+            req.body.transactionPrize = parseFloat(req.body.transactionPrize);
             let isTrPrizePositive = false;
     
             if (req.body.transactionPrize > 0)

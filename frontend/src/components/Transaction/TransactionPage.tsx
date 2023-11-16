@@ -114,7 +114,7 @@ function TransactionPage()
         
     };
 
-    const updateAccountTotalAmount = async(totalAm:number) =>
+    const updateAccountTotalAmount = async(totalAm:any) =>
     {
         await axios.patch(config.pool+'account/'+ aId,{
             totalAm,
@@ -123,14 +123,14 @@ function TransactionPage()
 
     const deleteTransaction = async(trans:TransactionAccount | null)=>
     {
-        let total = account.totalAmount;
+        let total = parseFloat(account.totalAmount.toString());
         if (trans!.isDeposit)
         {
             total -= trans!.transactionPrize;
         }
         else
         {
-            total += trans!.transactionPrize;
+            total =  total + parseFloat(trans!.transactionPrize.toString());
         }
         updateAccountTotalAmount(total);
         setAccount({ ...account, totalAmount: total })

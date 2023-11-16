@@ -25,7 +25,7 @@ const ComponentPieChart: React.FC<DepositPieChartProps> = ({ transactions,isDepo
             acc[categoryName] = 0;
         }
 
-        acc[categoryName] += transaction.transactionPrize;
+        acc[categoryName] += parseFloat(transaction.transactionPrize.toString());
 
         return acc;
     }, {});

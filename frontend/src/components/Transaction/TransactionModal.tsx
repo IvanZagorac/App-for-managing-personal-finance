@@ -55,7 +55,7 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
         setCategories(response.data.resData);
     }
 
-    const updateAccountTotalAmount = async(totalAm:number) =>
+    const updateAccountTotalAmount = async(totalAm:any) =>
     {
         await axios.patch(config.pool+'account/'+ aId,{
             totalAm,
@@ -94,78 +94,52 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
             if (response.data.error)
             {
                 setErrorMessage(response.data.ajvMessage);
+                return;
             }
-            else
-            {
-                let total = account.totalAmount;
+
+            let total = account.totalAmount;
                 
-                if (isEdit)
+            if (isEdit)
+            {
+                const totalOnEdit = parseFloat((currTransPrize - responseBody.transactionPrize).toString());
+                if (responseBody.isDeposit)
                 {
-                    const totalOnEdit = currTransPrize - parseFloat(responseBody.transactionPrize);
-                    if (responseBody.isDeposit)
-                    {
-                        total = total - (totalOnEdit);
-                    }
-                    else
-                    {
-                        total = total + (totalOnEdit);
-                    }
-                    
-                    updateAccountTotalAmount(total);
-                    setAccount({ ...account, totalAmount: total })
-                    setCurrTransaction(response.data.resData);
-                    setTransactionModal(false);
-                    setSelectedCategoryId('');
-                    setCurrTransaction({ ...currTransaction,
-                        _id:'',
-                        accountId: {
-                            _id:'',
-                            userId:'',
-                            name:'',
-                            totalAmount:0,
-                        },
-                        categoryId: {
-                            _id:'',
-                            name:'',
-                            isDeposit: false,
-                            userId:''
-                        },
-                        time: '',
-                        description:'',
-                        transactionPrize:0,
-                        isDeposit:false,});
-                    setErrorMessage([]);
+                    total = total - totalOnEdit;
                 }
                 else
                 {
-                    if (responseBody.isDeposit)
-                    {
-                        total += parseFloat(responseBody.transactionPrize);
-                    }
-                    else
-                    {
-                        total -= parseFloat(responseBody.transactionPrize);
-                    }
-                    updateAccountTotalAmount(total);
-                    setAccount({ ...account, totalAmount: total })
-                    setTransaction(response.data.resData);
-                    setTransactionModal(false);
-                    setSelectedCategoryId('');
-                    setTransaction({ ...transaction, accountId: '',
-                        categoryId: {
-                            _id:'',
-                            name:'',
-                            isDeposit: false,
-                            userId:''
-                        },
-                        time: '',
-                        description:'',
-                        transactionPrize:0,
-                        isDeposit:false,});
-                    setErrorMessage([]);
+                    total = parseFloat(total.toString()) + totalOnEdit;
                 }
-                fetchAllTransactions();
             }
+            else
+            {
+                if (responseBody.isDeposit)
+                {
+                    total = parseFloat(total.toString()) + parseFloat(responseBody.transactionPrize);
+                }
+                else
+                {
+                    total -= responseBody.transactionPrize;
+                }
+            }
+            updateAccountTotalAmount(total);
+            setAccount({ ...account, totalAmount: total })
+            setTransaction(response.data.resData);
+            setTransactionModal(false);
+            setSelectedCategoryId('');
+            setTransaction({ ...transaction, accountId: '',
+                categoryId: {
+                    _id:'',
+                    name:'',
+                    isDeposit: false,
+                    userId:''
+                },
+                time: '',
+                description:'',
+                transactionPrize:0,
+                isDeposit:false,});
+            setErrorMessage([]);
+            fetchAllTransactions();
         }
         catch(e)
         {

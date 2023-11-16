@@ -92,12 +92,13 @@ const accountRouter = function (express, acc) {
                 },
                 required: ['name', 'userId', 'totalAmount',],
             };
+            req.body.userId = new mongodb_1.BSON.ObjectId(req.body.userId);
             req.body.totalAmount = parseFloat(req.body.totalAmount);
-            const accounts = new acc({
+            const accounts = {
                 userId: req.body.userId,
                 name: req.body.name,
                 totalAmount: req.body.totalAmount,
-            });
+            };
             const ajv = new ajv_1.default();
             const validate = ajv.compile(schema);
             const valid = validate(accounts);
@@ -127,7 +128,7 @@ const accountRouter = function (express, acc) {
                 }
                 else {
                     // No existing account found, save the new account
-                    const accs = yield accounts.save();
+                    const accs = yield acc.create(accounts);
                     res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: accs }));
                 }
             }

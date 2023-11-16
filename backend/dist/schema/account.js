@@ -19,7 +19,7 @@ const accountSchema = new mongoose_1.default.Schema({
 }, { toJSON: { getters: true } });
 function getTotalAmount(value) {
     if (typeof value !== 'undefined') {
-        return parseFloat(value.toString());
+        return parseFloat(value.toString()).toFixed(2);
     }
     return value;
 }

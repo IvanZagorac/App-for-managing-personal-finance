@@ -122,13 +122,13 @@ const accountRouter = function(express,acc):Router
                 },
                 required: ['name', 'userId', 'totalAmount',],
             };
-            req.body.totalAmount= parseFloat(req.body.totalAmount);
-            const accounts = new acc({
+            req.body.userId = new BSON.ObjectId(req.body.userId);
+            req.body.totalAmount = parseFloat(req.body.totalAmount);
+            const accounts = {
                 userId :req.body.userId,
                 name :req.body.name,
                 totalAmount :req.body.totalAmount,
-            })
-           
+            };
             
             const ajv = new Ajv();
             const validate = ajv.compile(schema);
@@ -168,7 +168,7 @@ const accountRouter = function(express,acc):Router
                 else
                 {
                     // No existing account found, save the new account
-                    const accs = await (accounts as typeof acc).save();
+                    const accs = await acc.create(accounts);
                     res.send(ApiResponse({ error: false, status: 200, resData: accs }));
                 }
             }

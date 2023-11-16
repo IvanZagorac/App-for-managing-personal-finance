@@ -22,7 +22,7 @@ function getTrPrize(value)
 {
     if (typeof value !== 'undefined') 
     {
-        return parseFloat(value.toString());
+        return parseFloat(value.toString()).toFixed(2);
     }
     return value;
 };
