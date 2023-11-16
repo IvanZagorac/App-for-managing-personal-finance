@@ -15,8 +15,18 @@ const transactionSchema = new mongoose_1.default.Schema({
     },
     time: { type: Date, default: Date.now },
     description: String,
-    transactionPrize: Number,
+    transactionPrize: {
+        type: mongoose_1.default.Types.Decimal128,
+        get: getTrPrize
+    },
     isDeposit: Boolean,
-});
+}, { toJSON: { getters: true } });
+function getTrPrize(value) {
+    if (typeof value !== 'undefined') {
+        return parseFloat(value.toString());
+    }
+    return value;
+}
+;
 exports.default = mongoose_1.default.model('Transactions', transactionSchema);
 //# sourceMappingURL=transaction.js.map

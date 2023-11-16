@@ -18,6 +18,19 @@ $whiteColor: white;
     font-size: 20px;
 }
 
+.delete-modal-buttons{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+    margin-bottom: 30px;
+}
+
+.modal-no-btn{
+    background-color: #024916!important;
+    margin-left: 10px;
+}
+
 .custom-checkbox-cat{
     display: flex!important;
     justify-content: center!important;
@@ -31,7 +44,7 @@ $whiteColor: white;
 }
 
 .edit-cat-btn{
-    padding: 10px!important;
+    padding: 5px 20px!important;
     background-color: $greenBackgroundColor!important;
     margin-right: 0px!important;
 }

@@ -1,5 +1,5 @@
 export const config = {
-    pool: 'https://app-for-managing-personal-finance.onrender.com/',
+    pool: 'http://localhost:8085/',
     // https://app-for-managing-personal-finance.onrender.com/
     // http://localhost:8085/'
 }

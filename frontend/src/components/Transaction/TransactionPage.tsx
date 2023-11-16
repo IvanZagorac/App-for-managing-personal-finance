@@ -18,6 +18,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import TransactionAccount from '../../model/Transaction/transactionAccount';
 import LineChart from './LineChart';
 import ComponentPieChart from './ComponentPieChart';
+import DeleteModal from '../DeleteModal';
 
 
 function TransactionPage()
@@ -30,6 +31,9 @@ function TransactionPage()
     const[allTransactions,setAllTransactions]=useState<TransactionAccount[]>([]);
     const[currentTransactionPrize,setCurrentTransactionPrize]=useState<number>(0);
     const[currTrans,setCurrTrans]=useState<TransactionAccount | null>(null);
+    const[currDelTrans,setCurrDelTrans] = useState<TransactionAccount | null>(null);
+    const[deleteErrorMessage,setDeleteErrorMessage] = useState<string>('');
+    const[deleteModal,setDeleteModal] = useState<boolean>(false);
     const[noDataMsg,setNoDataMsg] = useState<string>('');
     const[startDate,setStartDate]= useState<Date | null>(null);
     const[endDate,setEndDate]= useState<Date | null>(null);
@@ -78,6 +82,7 @@ function TransactionPage()
             });
             if (!response.data.error)
             {
+                
                 const transactionsData = response.data.resData.transactionList;
                 const allTrans = response.data.resData.allTransactions;
                 setTransactions(transactionsData);
@@ -94,6 +99,13 @@ function TransactionPage()
         {
             console.error('Error fetching transactions:', error);
         }
+    }
+
+    const handeDelete=(trans:TransactionAccount | null)=>
+    {
+        setDeleteModal(true);
+        setCurrDelTrans(trans);
+
     }
 
     const handlePageChange = (page: number) => 
@@ -122,6 +134,7 @@ function TransactionPage()
         }
         updateAccountTotalAmount(total);
         setAccount({ ...account, totalAmount: total })
+        setDeleteModal(false);
         await axios.delete(config.pool+'transaction/'+ trans!._id);
         getAllTransactions();
     }
@@ -257,8 +270,8 @@ function TransactionPage()
                                                     }
                                                 </Col>
                                                 <Col lg="3" sm="2" className='trans-field'>
-                                                    <Button className='remove-trans-btn' variant='danger' onClick={()=>deleteTransaction(trans)}>Remove</Button>
-                                                    <Button onClick={()=> handleModal(setTransactionModal,true,trans)} className='edit-trans-btn' variant='primary'>Edit Transaction</Button>
+                                                    <Button className='remove-trans-btn' variant='danger' onClick={()=>handeDelete(trans)}>Remove</Button>
+                                                    <Button onClick={()=> handleModal(setTransactionModal,true,trans)} className='edit-trans-btn' variant='primary'>Edit</Button>
                                                 </Col>
                                             </div>
                                         </>     
@@ -283,6 +296,20 @@ function TransactionPage()
                     }
 
                 </Row>
+                {
+                    currDelTrans 
+                        ?
+                        <DeleteModal 
+                            deleteModal={deleteModal}
+                            setDeleteModal={setDeleteModal}
+                            deleteErrorMessage={deleteErrorMessage}
+                            setDeleteErrorMessage={setDeleteErrorMessage}
+                            title={`Are you sure want delete transaction ${currDelTrans!.description}?`}
+                            deleteMethod={() => deleteTransaction(currDelTrans)}
+                        />
+                        :
+                        <></>
+                }
                 <TransactionModal 
                     transactionModal={transactionModal} 
                     setTransactionModal={setTransactionModal} 

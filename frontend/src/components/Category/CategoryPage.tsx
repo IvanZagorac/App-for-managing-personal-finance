@@ -1,24 +1,17 @@
 /* eslint-disable max-len */
 import { useEffect, useState } from 'react';
 import { Alert, Button, Card, Col, Container, Form, Modal, Pagination, Row } from 'react-bootstrap';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import {useNavigate } from 'react-router-dom';
 import MainMenu from '../MainMenu';
-import Account from '../../model/Account/account';
 import { config } from '../../config/config';
 import axios from 'axios';
-import DecodedToken from '../../model/Auth/token';
 import { togetherFunction } from '../../config/token';
 import ajvMess from '../../model/Auth/ajv';
 import Category from '../../model/Category/category';
+import DeleteModal from '../DeleteModal';
 
 function CategoryPage()
 {
-
-    // const[decodedToken,setDecodedToken] = useState<DecodedToken>({
-    //     value: null,
-    //     isExpire: false,
-    //     isExist: true,
-    // })
     const[allCategories,setAllCategories] = useState<Category[]>([])
     const[category,setCateogry]=useState<Category>({
         _id:'',
@@ -27,6 +20,9 @@ function CategoryPage()
         userId:''
     })
     const[currCategory,setCurrCategory] = useState<Category | null>(null);
+    const[deleteModal,setDeleteModal] = useState<boolean>(false);
+    const[removeCurrCat,setRemoveCurrCat]= useState<Category | null>(null);
+    const[deleteErrorMessage,setDeleteErrorMessage] = useState<string>('');
     const [currentPage, setCurrentPage] = useState<number>(1);
     const[filterIsDeposit,setFilterIsDeposit]=useState<boolean>(false);
     const[isEdit,setIsEdit] = useState<boolean>(false);
@@ -130,11 +126,17 @@ function CategoryPage()
         }
     };
 
-    // const deleteCategory = async(id:string)=>
-    // {
-    //     await axios.delete(config.pool+'category/'+id);
-    //     getAllCategories();
-    // }
+    const deleteCategory = async(id:string)=>
+    {
+        const response = await axios.delete(config.pool+'category/'+id);
+        if (response.data.error)
+        {
+            setDeleteErrorMessage(response.data.description);
+            return;
+        }
+        setDeleteModal(false);
+        getAllCategories();
+    }
 
     const handleModal =(setModal:any,trueOrFalse:boolean,currCat:Category | null)=>
     {
@@ -167,6 +169,11 @@ function CategoryPage()
         }
     }
 
+    const handeDelete=(cat:Category | null)=>
+    {
+        setDeleteModal(true);
+        setRemoveCurrCat(cat);
+    }
     
     useEffect(()=>
     {
@@ -177,7 +184,7 @@ function CategoryPage()
             navigate('/');
         } 
         
-    },[filterIsDeposit,isEdit,currentPage])
+    },[filterIsDeposit,isEdit,currentPage,removeCurrCat])
 
     return(
         <>
@@ -260,10 +267,8 @@ function CategoryPage()
                                                             <p>{cat.name}</p>
                                                         </Col>
                                                         <Col lg="6" sm="6" className='cat-field'>
-                                                            {
-                                                                // <Button className='card-header-btn' variant='danger' onClick={()=>deleteCategory(cat._id)}>Remove</Button>
-                                                            }
-                                                            <Button onClick={()=> handleModal(setCategoryModal,true,cat)} className='edit-cat-btn' variant='primary'>Edit Category</Button>
+                                                            <Button onClick={()=> handleModal(setCategoryModal,true,cat)} className='edit-cat-btn' variant='primary'>Edit</Button>
+                                                            <Button className='remove-trans-btn' variant='danger' onClick={() =>handeDelete(cat)}>Remove</Button>
                                                         </Col>
                                                     </div>
                                   
@@ -276,10 +281,22 @@ function CategoryPage()
                         }
                     </div>
                 </Row>
-                    
-                    
-                
             </Container>
+            {
+                removeCurrCat 
+                    ?
+                    <DeleteModal 
+                        deleteModal={deleteModal}
+                        setDeleteModal={setDeleteModal}
+                        deleteErrorMessage={deleteErrorMessage}
+                        setDeleteErrorMessage={setDeleteErrorMessage}
+                        title={`Are you sure want delete category ${removeCurrCat!.name}?`}
+                        deleteMethod={() => deleteCategory(removeCurrCat!._id)}
+                    />
+                    :
+                    <></>
+            }
+           
             <Modal
                 centered
                 show={categoryModal}

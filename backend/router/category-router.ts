@@ -1,9 +1,10 @@
+/* eslint-disable max-len */
 import { Router, Request, Response } from 'express';
 import ApiResponse from '../config/ApiResponse';
 import Ajv from 'ajv';
 import { BSON } from 'mongodb';
 
-const categoryRouter = function(express,cat):Router
+const categoryRouter = function(express,cat,trans):Router
 {
     const category = express.Router();
 
@@ -208,8 +209,16 @@ const categoryRouter = function(express,cat):Router
     {
         try
         {
-            const removedList = await cat.findOneAndRemove({_id:req.params.id})
-            res.send(ApiResponse({ error: false, status: 200, resData: removedList }));
+            const transactionList = await trans.find({categoryId:req.params.id});
+            if (transactionList.length == 0)
+            {
+                const removedList = await cat.findOneAndRemove({_id:req.params.id})
+                res.send(ApiResponse({ error: false, status: 200, resData: removedList }));
+            }
+            else
+            {
+                res.send(ApiResponse({ error: true, status: 409, description:'Cannot remove category which is used for transaction'}));
+            }
         
         }
         catch(e)

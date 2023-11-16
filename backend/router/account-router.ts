@@ -117,11 +117,12 @@ const accountRouter = function(express,acc):Router
                             userId: {type: 'string', pattern: '^[a-f\\d]{24}$'},
                         },
                     },
-                    totalAmount: { type: 'integer' },
+                    totalAmount: { type: 'number' },
                   
                 },
                 required: ['name', 'userId', 'totalAmount',],
             };
+            req.body.totalAmount= parseFloat(req.body.totalAmount);
             const accounts = new acc({
                 userId :req.body.userId,
                 name :req.body.name,
@@ -144,7 +145,8 @@ const accountRouter = function(express,acc):Router
             }
             if (existsTwoAcc)
             {
-                res.send(ApiResponse({error:true,ajvMessage:arr, status:500}))
+                res.send(ApiResponse({error:true,ajvMessage:arr, status:500}));
+                return;
             }
             if (!valid)
             {

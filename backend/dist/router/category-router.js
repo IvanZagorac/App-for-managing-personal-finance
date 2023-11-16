@@ -15,7 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const ApiResponse_1 = __importDefault(require("../config/ApiResponse"));
 const ajv_1 = __importDefault(require("ajv"));
 const mongodb_1 = require("mongodb");
-const categoryRouter = function (express, cat) {
+const categoryRouter = function (express, cat, trans) {
     const category = express.Router();
     category.get('/filterDeposit', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
@@ -156,8 +156,14 @@ const categoryRouter = function (express, cat) {
     }));
     category.delete('/:id', (req, res) => __awaiter(this, void 0, void 0, function* () {
         try {
-            const removedList = yield cat.findOneAndRemove({ _id: req.params.id });
-            res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
+            const transactionList = yield trans.find({ categoryId: req.params.id });
+            if (transactionList.length == 0) {
+                const removedList = yield cat.findOneAndRemove({ _id: req.params.id });
+                res.send((0, ApiResponse_1.default)({ error: false, status: 200, resData: removedList }));
+            }
+            else {
+                res.send((0, ApiResponse_1.default)({ error: true, status: 409, description: 'Cannot remove category which is used for transaction' }));
+            }
         }
         catch (e) {
             throw new Error(e);

@@ -8,8 +8,20 @@ const accountSchema = new mongoose.Schema({
     name: {
         type: String,
     },
-    totalAmount:Number
-})
+    totalAmount:{
+        type: mongoose.Types.Decimal128,
+        get:getTotalAmount
+    },
+},{toJSON:{getters:true}})
+
+function getTotalAmount(value) 
+{
+    if (typeof value !== 'undefined') 
+    {
+        return parseFloat(value.toString());
+    }
+    return value;
+};
 
 accountSchema.index({ userId: 1, name: 1 }, { unique: true });
 

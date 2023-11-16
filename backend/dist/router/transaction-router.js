@@ -116,13 +116,13 @@ const transactionRouter = function (express, trans) {
                         type: 'string',
                         minLength: 4,
                     },
-                    transactionPrize: { type: 'integer' },
+                    transactionPrize: { type: 'number' },
                     isDeposit: { type: 'boolean' },
                 },
                 required: ['accountId', 'categoryId', 'description', 'transactionPrize', 'isDeposit']
             };
             req.body.accountId = new mongodb_1.BSON.ObjectId(req.body.accountId);
-            req.body.transactionPrize = parseInt(req.body.transactionPrize, 10);
+            req.body.transactionPrize = parseFloat(req.body.transactionPrize);
             let isTrPrizePositive = false;
             if (req.body.transactionPrize > 0) {
                 isTrPrizePositive = true;

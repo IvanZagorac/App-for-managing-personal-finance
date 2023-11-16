@@ -147,7 +147,7 @@ const transactionRouter = function(express,trans):Router
                         type:'string',
                         minLength:4,
                     },
-                    transactionPrize: { type: 'integer' },
+                    transactionPrize: { type: 'number' },
                     isDeposit: { type: 'boolean' },
                   
                 },
@@ -155,7 +155,7 @@ const transactionRouter = function(express,trans):Router
             };
     
             req.body.accountId = new BSON.ObjectId(req.body.accountId);
-            req.body.transactionPrize = parseInt(req.body.transactionPrize,10);
+            req.body.transactionPrize = parseFloat(req.body.transactionPrize.toFixed(4));
             let isTrPrizePositive = false;
     
             if (req.body.transactionPrize > 0)

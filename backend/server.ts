@@ -70,7 +70,7 @@ const initServer = () =>
     app.use('/auth', authRouter(express, user));
     app.use('/account', accountRouter(express, account));
     app.use('/transaction', transactionRouter(express, transaction));
-    app.use('/category', categoryRouter(express, category));
+    app.use('/category', categoryRouter(express, category,transaction));
     app.listen(config.port);
 
     console.log('Running on port ' + config.port);

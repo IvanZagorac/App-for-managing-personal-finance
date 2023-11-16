@@ -101,7 +101,7 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
                 
                 if (isEdit)
                 {
-                    const totalOnEdit = currTransPrize - parseInt(responseBody.transactionPrize,10);
+                    const totalOnEdit = currTransPrize - parseFloat(responseBody.transactionPrize);
                     if (responseBody.isDeposit)
                     {
                         total = total - (totalOnEdit);
@@ -140,11 +140,11 @@ function TransactionModal({ transactionModal, setTransactionModal, currTransacti
                 {
                     if (responseBody.isDeposit)
                     {
-                        total += parseInt(responseBody.transactionPrize,10);
+                        total += parseFloat(responseBody.transactionPrize);
                     }
                     else
                     {
-                        total -= parseInt(responseBody.transactionPrize,10);
+                        total -= parseFloat(responseBody.transactionPrize);
                     }
                     updateAccountTotalAmount(total);
                     setAccount({ ...account, totalAmount: total })
